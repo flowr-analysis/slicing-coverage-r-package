@@ -1,0 +1,19 @@
+Package: tbd
+Title: Slicing Coverage for Packages
+Version: 0.1.0
+Authors@R:
+    person("Lukas", "Pietzschmann", , "lukas.pietzschmann@uni-ulm.de", role = c("aut", "cre"))
+Description: Track and report code coverage for your package. Compared to
+    traditional approaches, Slicing Coverage aims to enhance the accuracy
+    of coverage scores by calculating them based on the program slice
+    resulting from the test’s assertion criteria. This way, we are able to
+    account for code that's covered but no checked, thus providing a score
+    that can reflect the tests quality more accurately. This package
+    integrates with most of covr's functionality and should therefore be
+    easily integrated into existing projects.
+License: use_mit_license()
+Imports:
+    covr (>= 3.0.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
