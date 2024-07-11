@@ -14,6 +14,7 @@ Description: Track and report code coverage for your package. Compared to
 License: use_mit_license()
 Imports:
     covr (>= 3.0.0),
+    jsonlite (>= 1.8.0),
     logger (>= 0.3.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
