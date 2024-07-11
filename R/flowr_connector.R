@@ -1,10 +1,12 @@
 library(jsonlite)
 source("R/logger.R")
+source("R/config.R")
 
 logger <- create_new_logger("flowr connection")
 flowr_con <- NULL
 
-create_connection <- function(host = "localhost", port = 1042) {
+create_connection <- function(host = get_option("flowr_host"),
+                              port = get_option("flowr_port")) {
   if (!is.null(flowr_con) && isOpen(flowr_con)) {
     logger(INFO, "Reusing existing connection")
     return()
