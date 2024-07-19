@@ -1,4 +1,11 @@
 library(covr)
+library(logger)
+
+source("R/config.R")
+source("R/flowr_connector.R")
+source("R/logger.R")
+
+logger <- create_new_logger("cov")
 
 #' @export
 file_coverage <- function(
@@ -12,6 +19,8 @@ file_coverage <- function(
   if (!missing(function_exclusions)) {
     stop("function_exclusions is not supported")
   }
+
+  request_slice(source_files[1], c("3@z"))
 
   covr::file_coverage(
     source_files = source_files,
