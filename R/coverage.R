@@ -1,10 +1,6 @@
 library(covr)
 library(logger)
 
-source("R/config.R")
-source("R/flowr_connector.R")
-source("R/logger.R")
-
 logger <- create_new_logger("cov")
 
 #' @export
