@@ -9,12 +9,7 @@ file_coverage <- function(
     test_files,
     line_exclusions = NULL,
     function_exclusions = NULL) {
-  if (!missing(line_exclusions)) {
-    stop("line_exclusions is not supported")
-  }
-  if (!missing(function_exclusions)) {
-    stop("function_exclusions is not supported")
-  }
+  stopifnot(missing(line_exclusions), missing(function_exclusions))
 
   request_slice(source_files[1], c("3@z"))
 
@@ -31,15 +26,7 @@ package_coverage <- function(line_exclusions = NULL,
                              function_exclusions = NULL,
                              ...,
                              exclusions) {
-  if (!missing(line_exclusions)) {
-    stop("line_exclusions is not supported")
-  }
-  if (!missing(function_exclusions)) {
-    stop("function_exclusions is not supported")
-  }
-  if (!missing(exclusions)) {
-    stop("exclusions is not supported")
-  }
+  stopifnot(missing(line_exclusions), missing(function_exclusions), missing(exclusions))
 
   covr::package_coverage(
     line_exclusions = line_exclusions,
