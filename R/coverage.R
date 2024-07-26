@@ -61,9 +61,6 @@ file_coverage <- function(
     ))
   })
 
-  ids_in_slice <- result$slice$result
-  print(ids_in_slice)
-
   covr_res <- covr::file_coverage(
     source_files = source_files,
     test_files = test_files,
@@ -71,9 +68,15 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  df <- as.data.frame(covr_res)
-  df <- populate_corv_info_with_ids(df, result$ast)
-  print(df)
+  df <- populate_corv_info_with_ids(as.data.frame(covr_res), result$ast)
+
+  set_executable <- df$flowr_id
+  set_executed <- subset(df, value == 1)$flowr_id
+  set_slice <- unlist(result$slice$result)
+
+  print(set_executable)
+  print(set_executed)
+  print(set_slice)
 }
 
 #' @export
