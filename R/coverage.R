@@ -1,6 +1,42 @@
 library(covr)
 library(flowradapter)
 
+get_location <- function(node) {
+  if ("fullRange" %in% names(node$info)) {
+    location <- node$info$fullRange
+  } else if ("location" %in% names(node)) {
+    location <- node$location
+  } else {
+    return(NULL)
+  }
+  return(list(
+    first_line = location[1],
+    first_column = location[2],
+    last_line = location[3],
+    last_column = location[4]
+  ))
+}
+
+populate_corv_info_with_ids <- function(covr_info, ast) {
+  covr_info[, "flowr_id"] <- NA
+  visit_nodes(ast, function(node) {
+    location <- get_location(node)
+    if (is.null(location)) {
+      return()
+    }
+
+    for (i in seq_len(nrow(covr_info))) {
+      elem <- covr_info[i, ]
+      lines_match <- elem$last_line == location$last_line && elem$first_line == location$first_line
+      cols_match <- elem$first_column == location$first_column && elem$last_column == location$last_column
+      if (lines_match && cols_match) {
+        covr_info[i, "flowr_id"] <<- node$info$id
+      }
+    }
+  })
+  return(covr_info)
+}
+
 #' @export
 file_coverage <- function(
     source_files,
@@ -9,8 +45,9 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
-  slice <- with_connection(function(con) {
-    ana_res <- request_file_analysis(con, test_files[1])
+  result <- with_connection(function(con) {
+    # TODO: Should be test_files[1]. But for this to work ,we need to tell flowr to also analyze files from source_files
+    ana_res <- request_file_analysis(con, source_files[1])
     criteria <- vector()
     visit_nodes(ana_res$res$results$normalize, function(node) {
       if (node$type == "RFunctionCall" && node$named && node$functionName$content == "expect_equal") {
@@ -18,10 +55,13 @@ file_coverage <- function(
       }
     })
     slc_res <- request_slice(con, ana_res$filetoken, criteria)
-    return(slc_res$res$results$slice)
+    return(list(
+      ast = ana_res$res$results$normalize,
+      slice = slc_res$res$results$slice
+    ))
   })
 
-  ids_in_slice <- slice$result
+  ids_in_slice <- result$slice$result
   print(ids_in_slice)
 
   covr_res <- covr::file_coverage(
@@ -31,7 +71,9 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  print(as.data.frame(covr_res))
+  df <- as.data.frame(covr_res)
+  df <- populate_corv_info_with_ids(df, result$ast)
+  print(df)
 }
 
 #' @export
