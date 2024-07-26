@@ -1,7 +1,5 @@
 library(covr)
-library(logger)
-
-logger <- create_new_logger("cov")
+library(flowradapter)
 
 #' @export
 file_coverage <- function(
@@ -11,14 +9,29 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
-  request_slice(source_files[1], c("3@z"))
+  slice <- with_connection(function(con) {
+    ana_res <- request_file_analysis(con, test_files[1])
+    criteria <- vector()
+    visit_nodes(ana_res$res$results$normalize, function(node) {
+      if (node$type == "RFunctionCall" && node$named && node$functionName$content == "expect_equal") {
+        criteria <<- append(criteria, sprintf("$%s", node$info$id))
+      }
+    })
+    slc_res <- request_slice(con, ana_res$filetoken, criteria)
+    return(slc_res$res$results$slice)
+  })
 
-  covr::file_coverage(
+  ids_in_slice <- slice$result
+  print(ids_in_slice)
+
+  covr_res <- covr::file_coverage(
     source_files = source_files,
     test_files = test_files,
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions
   )
+
+  print(as.data.frame(covr_res))
 }
 
 #' @export
