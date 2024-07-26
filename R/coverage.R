@@ -73,10 +73,14 @@ file_coverage <- function(
   set_executable <- df$flowr_id
   set_executed <- subset(df, value == 1)$flowr_id
   set_slice <- unlist(result$slice$result)
+  set_executed_and_slice <- intersect(set_executed, set_slice)
+  score <- length(set_executed_and_slice) / length(set_executable)
 
   print(set_executable)
   print(set_executed)
   print(set_slice)
+  print(set_executed_and_slice)
+  print(sprintf("%f%%", score * 100))
 }
 
 #' @export
