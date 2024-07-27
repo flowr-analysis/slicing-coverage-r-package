@@ -1,0 +1,21 @@
+image: rocker/tidyverse
+
+stages:
+  - test
+  - build
+
+check:
+  stage: test
+  script:
+    - Rscript -e 'devtools::check(error_on= "error")'
+
+# TODO: Uncomment once we have tests
+# test:
+#   stage: test
+#   script:
+#     - Rscript -e 'devtools::test()'
+
+build:
+  stage: build
+  script:
+    - Rscript -e 'devtools::build()'
