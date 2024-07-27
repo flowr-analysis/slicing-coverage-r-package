@@ -9,6 +9,13 @@ check:
   script:
     - Rscript -e 'devtools::check(error_on= "error")'
 
+lint:
+  stage: test
+  variables:
+    LINTR_ERROR_ON_LINT: true
+  script:
+    - Rscript -e 'lintr::lint_package()'
+
 # TODO: Uncomment once we have tests
 # test:
 #   stage: test
