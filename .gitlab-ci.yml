@@ -20,13 +20,6 @@ setup:
   script:
     - mkdir -p ~/R
     - echo '.libPaths("~/R")' > ~/.Rprofile
-
-install_deps:
-  stage: .pre
-  cache:
-    <<: *global_cache
-    policy: pull-push
-  script:
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
 
