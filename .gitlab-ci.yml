@@ -30,7 +30,7 @@ check:
     <<: *global_cache
   script:
     - ls -la
-    - la -la R
+    - ls -la R
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
