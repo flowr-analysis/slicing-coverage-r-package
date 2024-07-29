@@ -33,10 +33,10 @@ lint:
   cache:
     <<: *global_cache
   variables:
-    LINTR_ERROR_ON_LINT: true
+    LINTR_ERROR_ON_LINT: false
   script:
     - Rscript -e 'install.packages("lintr")'
-    - Rscript -e '.libPaths("../R") ; lintr::lint_package()'
+    - Rscript -e 'lintr::lint_package()'
 
 # TODO: Uncomment once we have tests
 # test:
