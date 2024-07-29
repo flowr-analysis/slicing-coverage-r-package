@@ -29,6 +29,7 @@ check:
   cache:
     <<: *global_cache
   script:
+    - tree .
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
