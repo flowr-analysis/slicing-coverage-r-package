@@ -31,6 +31,7 @@ check:
   script:
     - ls -la
     - ls -la R
+    - Rscript -e '.libPaths()'
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
