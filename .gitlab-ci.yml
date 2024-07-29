@@ -8,8 +8,8 @@ default:
   cache: &global_cache
     key: r-cache
     paths:
-      - ~/.Rprofile
-      - ~/R
+      - "$CI_PROJECT_DIR/.Rprofile"
+      - "$CI_PROJECT_DIR/.Rprofile"
     policy: pull
 
 setup:
@@ -18,8 +18,8 @@ setup:
     <<: *global_cache
     policy: pull-push
   script:
-    - mkdir -p ~/R
-    - echo '.libPaths("~/R")' > ~/.Rprofile
+    - mkdir -p "$CI_PROJECT_DIR/R"
+    - echo '.libPaths("$CI_PROJECT_DIR/R")' > "$CI_PROJECT_DIR/.Rprofile"
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
 
