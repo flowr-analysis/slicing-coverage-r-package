@@ -6,7 +6,7 @@ stages:
 
 default:
   cache: &global_cache
-    key: r-pgk-cache
+    key: r-pgk-cache-$CI_COMMIT_SHA
     paths:
       - "../R"
     policy: pull
