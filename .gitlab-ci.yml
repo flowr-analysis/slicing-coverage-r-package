@@ -36,7 +36,7 @@ lint:
     LINTR_ERROR_ON_LINT: true
   script:
     - Rscript -e 'install.packages("lintr")'
-    - Rscript -e 'lintr::lint_package()'
+    - Rscript -e '.libPaths("../R") ; lintr::lint_package()'
 
 # TODO: Uncomment once we have tests
 # test:
