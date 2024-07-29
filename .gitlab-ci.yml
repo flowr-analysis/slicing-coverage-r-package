@@ -20,9 +20,9 @@ setup:
     - mkdir -p "./R"
     - echo '.libPaths("./R")' > ~/.Rprofile
     - cat ~/.Rprofile
-    - Rscript -e 'install.packages("lintr")'
-    - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
-    - Rscript -e 'devtools::install_dev_deps()'
+    - Rscript -e '.libPaths("./R") ; install.packages("lintr")'
+    - Rscript -e '.libPaths("./R") ; devtools::install_github("flowr-analysis/flowr-r-adapter")'
+    - Rscript -e '.libPaths("./R") ; devtools::install_dev_deps()'
 
 check:
   stage: test
