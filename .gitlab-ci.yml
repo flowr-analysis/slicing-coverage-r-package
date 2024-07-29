@@ -4,6 +4,11 @@ stages:
   - test
   - build
 
+setup:
+  stage: .pre
+  script:
+    - Rscript -e 'devtools::install_dev_deps()'
+
 check:
   stage: test
   script:
