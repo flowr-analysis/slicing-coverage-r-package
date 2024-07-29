@@ -8,7 +8,7 @@ default:
   cache: &global_cache
     key: r-pgk-cache
     paths:
-      - "./R"
+      - "../R"
     policy: pull
 
 setup:
@@ -17,22 +17,18 @@ setup:
     <<: *global_cache
     policy: pull-push
   script:
-    - mkdir -p "./R"
-    - echo '.libPaths("./R")' > ~/.Rprofile
-    - cat ~/.Rprofile
-    - Rscript -e '.libPaths("./R") ; install.packages("lintr")'
-    - Rscript -e '.libPaths("./R") ; devtools::install_github("flowr-analysis/flowr-r-adapter")'
-    - Rscript -e '.libPaths("./R") ; devtools::install_dev_deps()'
+    - mkdir -p "../R"
+    - echo '.libPaths("../R")' > ~/.Rprofile
+    - Rscript -e '.libPaths("../R") ; install.packages("lintr")'
+    - Rscript -e '.libPaths("../R") ; devtools::install_github("flowr-analysis/flowr-r-adapter")'
+    - Rscript -e '.libPaths("../R") ; devtools::install_dev_deps()'
 
 check:
   stage: test
   cache:
     <<: *global_cache
   script:
-    - ls -la
-    - ls -la R
-    - Rscript -e '.libPaths()'
-    - Rscript -e '.libPaths("./R") ; devtools::check(error_on= "error")'
+    - Rscript -e '.libPaths("../R") ; devtools::check(error_on= "error")'
 
 lint:
   stage: test
@@ -41,7 +37,7 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: true
   script:
-    - Rscript -e '.libPaths("./R") ; lintr::lint_package()'
+    - Rscript -e '.libPaths("../R") ; lintr::lint_package()'
 
 # TODO: Uncomment once we have tests
 # test:
@@ -49,11 +45,11 @@ lint:
 #   cache:
 #     <<: *global_cache
 #   script:
-#     - Rscript -e '.libPaths("./R") ; devtools::test()'
+#     - Rscript -e '.libPaths("../R") ; devtools::test()'
 
 build:
   stage: build
   cache:
     <<: *global_cache
   script:
-    - Rscript -e '.libPaths("./R") ; devtools::build()'
+    - Rscript -e '.libPaths("../R") ; devtools::build()'
