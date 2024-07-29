@@ -19,6 +19,7 @@ setup:
   script:
     - mkdir -p "$CI_PROJECT_DIR/R"
     - echo '.libPaths("$CI_PROJECT_DIR/R")' > ~/.Rprofile
+    - cat ~/.Rprofile
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
