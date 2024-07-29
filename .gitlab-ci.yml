@@ -6,9 +6,8 @@ stages:
 
 default:
   cache: &global_cache
-    key: r-cache
+    key: r-pgk-cache
     paths:
-      - "$CI_PROJECT_DIR/.Rprofile"
       - "$CI_PROJECT_DIR/R"
     policy: pull
 
@@ -19,7 +18,7 @@ setup:
     policy: pull-push
   script:
     - mkdir -p "$CI_PROJECT_DIR/R"
-    - echo '.libPaths("$CI_PROJECT_DIR/R")' > "$CI_PROJECT_DIR/.Rprofile"
+    - echo '.libPaths("$CI_PROJECT_DIR/R")' > ~/.Rprofile
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
