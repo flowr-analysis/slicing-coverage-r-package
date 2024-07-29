@@ -9,7 +9,7 @@ default:
     key: r-cache
     paths:
       - "$CI_PROJECT_DIR/.Rprofile"
-      - "$CI_PROJECT_DIR/.Rprofile"
+      - "$CI_PROJECT_DIR/R"
     policy: pull
 
 setup:
