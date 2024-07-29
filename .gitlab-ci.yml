@@ -32,7 +32,7 @@ check:
     - ls -la
     - ls -la R
     - Rscript -e '.libPaths()'
-    - Rscript -e 'devtools::check(error_on= "error")'
+    - Rscript -e '.libPaths("./R") ; devtools::check(error_on= "error")'
 
 lint:
   stage: test
@@ -41,7 +41,7 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: true
   script:
-    - Rscript -e 'lintr::lint_package()'
+    - Rscript -e '.libPaths("./R") ; lintr::lint_package()'
 
 # TODO: Uncomment once we have tests
 # test:
@@ -49,11 +49,11 @@ lint:
 #   cache:
 #     <<: *global_cache
 #   script:
-#     - Rscript -e 'devtools::test()'
+#     - Rscript -e '.libPaths("./R") ; devtools::test()'
 
 build:
   stage: build
   cache:
     <<: *global_cache
   script:
-    - Rscript -e 'devtools::build()'
+    - Rscript -e '.libPaths("./R") ; devtools::build()'
