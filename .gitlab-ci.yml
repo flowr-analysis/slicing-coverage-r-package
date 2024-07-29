@@ -19,7 +19,7 @@ setup:
     policy: pull-push
   script:
     - mkdir -p ~/R
-    - [ ! -f ~/.Rprofile ] && echo '.libPaths("~/R")' > ~/.Rprofile
+    - echo '.libPaths("~/R")' > ~/.Rprofile
 
 install_deps:
   stage: .pre
