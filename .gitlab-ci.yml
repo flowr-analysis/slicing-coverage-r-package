@@ -18,8 +18,6 @@ setup:
     policy: pull-push
   script:
     - mkdir -p "../R"
-    - echo '.libPaths("../R")' > ~/.Rprofile
-    - Rscript -e '.libPaths("../R") ; install.packages("lintr")'
     - Rscript -e '.libPaths("../R") ; devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e '.libPaths("../R") ; devtools::install_dev_deps()'
 
@@ -37,7 +35,8 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: true
   script:
-    - Rscript -e '.libPaths("../R") ; lintr::lint_package()'
+    - Rscript -e 'install.packages("lintr")'
+    - Rscript -e 'lintr::lint_package()'
 
 # TODO: Uncomment once we have tests
 # test:
