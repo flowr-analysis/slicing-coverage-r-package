@@ -20,7 +20,6 @@ setup:
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
     - ls -la /usr/local/lib/R/site-library
-    - ls -la /home/gitlab-runner/cache/
 
 check:
   stage: test
@@ -28,7 +27,6 @@ check:
     <<: *global_cache
   script:
     - ls -la /usr/local/lib/R/site-library
-    - ls -la /home/gitlab-runner/cache/
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
@@ -39,7 +37,6 @@ lint:
     LINTR_ERROR_ON_LINT: false
   script:
     - ls -la /usr/local/lib/R/site-library
-    - ls -la /home/gitlab-runner/cache/
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'lintr::lint_package()'
 
