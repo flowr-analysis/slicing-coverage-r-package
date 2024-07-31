@@ -4,14 +4,11 @@ stages:
   - test
   - build
 
-variables:
-  R_LIBS_USER: "../R"
-
 default:
   cache: &global_cache
     key: r-pgk-cache-$CI_COMMIT_SHA
     paths:
-      - $R_LIBS_USER
+      - /usr/local/lib/R/site-library
     policy: pull
 
 setup:
@@ -20,7 +17,6 @@ setup:
     <<: *global_cache
     policy: pull-push
   script:
-    - mkdir -p $R_LIBS_USER
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
 
