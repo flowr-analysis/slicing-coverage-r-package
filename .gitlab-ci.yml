@@ -25,6 +25,7 @@ check:
   cache:
     <<: *global_cache
   script:
+    - ls -la /usr/local/lib/R/site-library
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
@@ -34,6 +35,7 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: false
   script:
+    - ls -la /usr/local/lib/R/site-library
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'lintr::lint_package()'
 
