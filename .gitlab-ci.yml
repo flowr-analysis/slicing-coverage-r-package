@@ -19,6 +19,7 @@ setup:
   script:
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
+    - ls -la /usr/local/lib/R/site-library
 
 check:
   stage: test
