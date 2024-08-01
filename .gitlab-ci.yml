@@ -17,7 +17,7 @@ setup:
   stage: .pre
   cache:
     <<: *global_cache
-    policy: push
+    policy: pull-push
   script:
     - echo '.libPaths("$CI_PROJECT_DIR/.R_pkgs")' > $CI_PROJECT_DIR/.Rprofile
     - mkdir .R_pkgs
