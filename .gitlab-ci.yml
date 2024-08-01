@@ -6,7 +6,9 @@ stages:
 
 default:
   cache: &global_cache
-    key: r-pgk-cache-$CI_COMMIT_SHA
+    key:
+      files:
+        - DESCRIPTION
     paths:
       - .R_pkgs/
     policy: pull
