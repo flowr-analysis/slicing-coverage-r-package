@@ -37,7 +37,7 @@ lint:
   cache:
     <<: *global_cache
   variables:
-    LINTR_ERROR_ON_LINT: false
+    LINTR_ERROR_ON_LINT: true
   script:
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'lintr::lint_package()'
