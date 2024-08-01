@@ -21,14 +21,12 @@ setup:
     - mkdir .R_pkgs
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
-    - ls -la .R_pkgs
 
 check:
   stage: test
   cache:
     <<: *global_cache
   script:
-    - ls -la .R_pkgs
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
@@ -38,7 +36,6 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: false
   script:
-    - ls -la .R_pkgs
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'lintr::lint_package()'
 
@@ -55,5 +52,4 @@ build:
   cache:
     <<: *global_cache
   script:
-    - ls -la .R_pkgs
     - Rscript -e 'devtools::build()'
