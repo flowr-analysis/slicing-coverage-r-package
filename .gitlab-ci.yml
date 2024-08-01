@@ -8,25 +8,27 @@ default:
   cache: &global_cache
     key: r-pgk-cache-$CI_COMMIT_SHA
     paths:
-      - /usr/local/lib/R/site-library
+      - .R_pkgs/
     policy: pull
 
 setup:
   stage: .pre
   cache:
     <<: *global_cache
-    policy: pull-push
+    policy: push
   script:
+    - echo 'R_LIBS_USER=.R_pkgs/' > ~/.Renviron
+    - mkdir .R_pkgs
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
-    - ls -la /usr/local/lib/R/site-library
+    - ls -la .R_pkgs
 
 check:
   stage: test
   cache:
     <<: *global_cache
   script:
-    - ls -la /usr/local/lib/R/site-library
+    - ls -la .R_pkgs
     - Rscript -e 'devtools::check(error_on= "error")'
 
 lint:
@@ -36,7 +38,7 @@ lint:
   variables:
     LINTR_ERROR_ON_LINT: false
   script:
-    - ls -la /usr/local/lib/R/site-library
+    - ls -la .R_pkgs
     - Rscript -e 'install.packages("lintr")'
     - Rscript -e 'lintr::lint_package()'
 
@@ -53,4 +55,5 @@ build:
   cache:
     <<: *global_cache
   script:
+    - ls -la .R_pkgs
     - Rscript -e 'devtools::build()'
