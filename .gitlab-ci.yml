@@ -10,7 +10,7 @@ default:
       files:
         - DESCRIPTION
     paths:
-      - .R_pkgs/
+      - $CI_PROJECT_DIR/.R_pkgs/
     policy: pull
 
 setup:
@@ -19,7 +19,7 @@ setup:
     <<: *global_cache
     policy: push
   script:
-    - echo '.libPaths("./.R_pkgs")' > .Rprofile
+    - echo '.libPaths("$CI_PROJECT_DIR/.R_pkgs")' > $CI_PROJECT_DIR/.Rprofile
     - mkdir .R_pkgs
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
