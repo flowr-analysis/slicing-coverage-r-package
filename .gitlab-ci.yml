@@ -10,7 +10,7 @@ default:
       files:
         - DESCRIPTION
     paths:
-      - ../.R_pkgs/
+      - .R_pkgs/
     policy: pull
 
 setup:
@@ -19,8 +19,8 @@ setup:
     <<: *global_cache
     policy: pull-push
   script:
-    - echo '.libPaths("../.R_pkgs")' > .Rprofile
-    - mkdir ../.R_pkgs
+    - echo '.libPaths("./.R_pkgs")' > .Rprofile
+    - mkdir .R_pkgs
     - Rscript -e '.libPaths()'
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
