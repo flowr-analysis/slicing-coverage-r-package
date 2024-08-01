@@ -17,7 +17,7 @@ setup:
     <<: *global_cache
     policy: push
   script:
-    - echo 'R_LIBS_USER=.R_pkgs/' > ~/.Renviron
+    - echo '.libPaths("./.R_pkgs")' > .Rprofile
     - mkdir .R_pkgs
     - Rscript -e 'devtools::install_github("flowr-analysis/flowr-r-adapter")'
     - Rscript -e 'devtools::install_dev_deps()'
