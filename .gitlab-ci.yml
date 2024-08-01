@@ -30,7 +30,7 @@ check:
   cache:
     <<: *global_cache
   script:
-    - Rscript -e 'devtools::check(error_on= "error")'
+    - Rscript -e 'devtools::check(error_on = "error")'
 
 lint:
   stage: test
@@ -48,7 +48,7 @@ lint:
 #   cache:
 #     <<: *global_cache
 #   script:
-#     - Rscript -e '.libPaths("../R") ; devtools::test()'
+#     - Rscript -e 'devtools::test()'
 
 build:
   stage: build
