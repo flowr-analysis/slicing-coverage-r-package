@@ -1,5 +1,5 @@
 library(covr)
-library(flowradapter)
+library(flowr)
 
 get_location <- function(node) {
   if ("fullRange" %in% names(node$info)) {
