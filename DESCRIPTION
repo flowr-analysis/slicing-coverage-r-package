@@ -18,7 +18,7 @@ Imports:
     jsonlite (>= 1.8.0),
     logger (>= 0.3.0)
 Remotes:
-    flowradapter=github::flowr-analysis/flowr-r-adapter
+    flowradapter=flowr-analysis/flowr-r-adapter
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
