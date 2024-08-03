@@ -17,7 +17,7 @@ get_location <- function(node) {
   ))
 }
 
-populate_corv_info_with_ids <- function(covr_info, ast) {
+add_ids_to_corv_info <- function(covr_info, ast) {
   covr_info[, "flowr_id"] <- NA
   visit_nodes(ast, function(node) {
     location <- get_location(node)

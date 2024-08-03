@@ -1,3 +1,5 @@
+library(flowr)
+
 make_get_connection <- function(con = NULL) {
   function() {
     if (is.null(con)) {
