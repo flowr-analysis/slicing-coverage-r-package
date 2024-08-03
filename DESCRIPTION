@@ -11,7 +11,7 @@ Description: Track and report code coverage for your package. Compared to
     that can reflect the tests quality more accurately. This package
     integrates with most of covr's functionality and should therefore be
     easily integrated into existing projects.
-License: use_mit_license()
+License: GPL (>= 3)
 Imports:
     covr (>= 3.0.0),
     flowr,
