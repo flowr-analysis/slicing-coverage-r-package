@@ -3,5 +3,3 @@
 export(configure)
 export(file_coverage)
 export(get_option)
-export(package_coverage)
-export(report)

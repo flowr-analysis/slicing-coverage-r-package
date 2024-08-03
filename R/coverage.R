@@ -68,32 +68,17 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  df <- populate_corv_info_with_ids(as.data.frame(covr_res), result$ast)
+  df <- add_ids_to_corv_info(as.data.frame(covr_res), result$ast)
 
   set_executable <- df$flowr_id
   set_executed <- subset(df, value == 1)$flowr_id
   set_slice <- unlist(result$slice$result)
-  set_executed_and_slice <- intersect(set_executed, set_slice)
-  score <- length(set_executed_and_slice) / length(set_executable)
+  set_exec_and_slice <- intersect(set_executed, set_slice)
+  score <- length(set_exec_and_slice) / length(set_executable)
 
   print(set_executable)
   print(set_executed)
   print(set_slice)
-  print(set_executed_and_slice)
+  print(set_exec_and_slice)
   print(sprintf("%f%%", score * 100))
-}
-
-#' @export
-package_coverage <- function(line_exclusions = NULL,
-                             function_exclusions = NULL,
-                             ...,
-                             exclusions) {
-  stopifnot(missing(line_exclusions), missing(function_exclusions), missing(exclusions))
-
-  covr::package_coverage(
-    line_exclusions = line_exclusions,
-    function_exclusions = function_exclusions,
-    ...,
-    exclusions = exclusions,
-  )
 }
