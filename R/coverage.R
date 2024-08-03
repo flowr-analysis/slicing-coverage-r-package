@@ -37,6 +37,13 @@ populate_corv_info_with_ids <- function(covr_info, ast) {
   return(covr_info)
 }
 
+#' Calculate slicing coverage for a set of files
+#'
+#' @param source_files Character vector of source files with function definitions to measure coverage
+#' @param test_files Character vector of test files with code to test the functions
+#' @param line_exclusions Currently unsupported
+#' @param function_exclusions Currently unsupported
+#'
 #' @export
 file_coverage <- function(
     source_files,
