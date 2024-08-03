@@ -3,9 +3,9 @@ on: push
 permissions: read-all
 
 jobs:
-  check:
+  check-and-build:
     runs-on: ${{ matrix.config.os }}
-    name: R CMD check on ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: Check and build on ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +27,16 @@ jobs:
             any::rcmdcheck
           needs: check
       - uses: r-lib/actions/check-r-package@v2
+      - name: Build
+        id: build
+        run: |
+          path <- devtools::build()
+          cat("pkg-build-path=", path, "\n", file = Sys.getenv("GITHUB_OUTPUT"), sep = "", append = TRUE)
+        shell: Rscript {0}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ format('{0}-{1}-r{2}-pkg', runner.os, runner.arch, matrix.config.r) }}
+          path: ${{ steps.build.outputs.pkg-build-path }}
 
   lint:
     runs-on: ubuntu-latest
