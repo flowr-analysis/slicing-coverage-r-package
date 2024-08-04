@@ -3,9 +3,9 @@ on: push
 permissions: read-all
 
 jobs:
-  check-and-build:
+  check:
     runs-on: ${{ matrix.config.os }}
-    name: Check and build on ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: R CMD check on ${{ matrix.config.os }} (${{ matrix.config.r }})
     strategy:
       fail-fast: false
       matrix:
@@ -23,9 +23,29 @@ jobs:
           r-version: ${{ matrix.config.r }}
           extra-packages: |
             any::rcmdcheck
-            any::devtools
       - name: R CMD check
         uses: r-lib/actions/check-r-package@v2
+
+  build:
+    runs-on: ${{ matrix.config.os }}
+    name: Build on ${{ matrix.config.os }} (${{ matrix.config.r }})
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: macos-latest, r: "release" }
+          - { os: windows-latest, r: "release" }
+          - { os: ubuntu-latest, r: "release" }
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - name: Setup repo and R
+        uses: flowr-analysis/slicing-coverage-r-package/.github/actions/setup@main
+        with:
+          r-version: ${{ matrix.config.r }}
+          extra-packages: |
+            any::devtools
       - name: Build
         id: build
         run: |
