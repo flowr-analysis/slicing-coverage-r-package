@@ -18,7 +18,7 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
     steps:
       - name: Setup repo and R
-        uses: ./.github/actions/setup
+        uses: flowr-analysis/slicing-coverage-r-package/.github/actions/setup@main
         with:
           r-version: ${{ matrix.config.r }}
           extra-packages: |
