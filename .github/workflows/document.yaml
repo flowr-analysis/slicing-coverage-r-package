@@ -16,7 +16,6 @@ jobs:
       - name: Setup repo and R
         uses: flowr-analysis/slicing-coverage-r-package/.github/actions/setup@main
         with:
-          r-version: ${{ matrix.config.r }}
           extra-packages: |
             any::roxygen2
       - name: Document
