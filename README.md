@@ -1,4 +1,4 @@
-# r-package
+# Slicing Coverage
 
 ## Development
 To get ready for development, you can follow the steps below:
