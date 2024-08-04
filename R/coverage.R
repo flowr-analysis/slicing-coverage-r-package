@@ -53,10 +53,10 @@ file_coverage <- function(
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
   result <- with_connection(function(con) {
-    # TODO: Should be test_files[1]. But for this to work ,we need to tell flowr to also analyze files from source_files
-    ana_res <- request_file_analysis(con, source_files[1])
+    ana_res <- request_file_analysis(con, c(source_files, test_files))
     criteria <- vector()
     visit_nodes(ana_res$res$results$normalize, function(node) {
+      # TODO: currently, the AST only contains nodes for one file, so this is buggy :(
       if (node$type == "RFunctionCall" && node$named && node$functionName$content == "expect_equal") {
         criteria <<- append(criteria, sprintf("$%s", node$info$id))
       }
