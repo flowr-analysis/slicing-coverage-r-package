@@ -1,4 +1,4 @@
-Package: slicing-coverage
+Package: slicingCoverage
 Title: Slicing Coverage for Packages
 Version: 0.1.0
 Authors@R:
