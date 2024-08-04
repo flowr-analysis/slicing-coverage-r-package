@@ -1,0 +1,35 @@
+name: "Setup R"
+
+on:
+  workflow_call:
+    inputs:
+      r-version:
+        description: "The R version to use"
+        required: false
+        default: "release"
+        type: string
+      image:
+        description: "The image to use for running"
+        required: false
+        default: "ubuntu-latest"
+        type: string
+      extra-packages:
+        description: "Additional R packages to install"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  flowr-action:
+    runs-on: ${{ inputs.image }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ inputs.r-version }}
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: ${{ inputs.extra-packages}}
