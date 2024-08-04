@@ -64,17 +64,12 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
-      - name: Install dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Setup repo and R
+        uses: flowr-analysis/slicing-coverage-r-package/.github/actions/setup@main
         with:
           extra-packages: |
             any::lintr
             local::.
-          needs: lint
       - name: Lint
         run: lintr::lint_package()
         shell: Rscript {0}
