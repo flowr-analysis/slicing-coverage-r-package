@@ -17,24 +17,43 @@ get_location <- function(node) {
   ))
 }
 
-add_ids_to_corv_info <- function(covr_info, ast) {
-  covr_info[, "flowr_id"] <- NA
+add_ids_to_coverage <- function(coverage, ast) {
   visit_nodes(ast, function(node) {
     location <- get_location(node)
     if (is.null(location)) {
       return()
     }
 
-    for (i in seq_len(nrow(covr_info))) {
-      elem <- covr_info[i, ]
-      lines_match <- elem$last_line == location$last_line && elem$first_line == location$first_line
-      cols_match <- elem$first_column == location$first_column && elem$last_column == location$last_column
+    for (i in seq_along(coverage)) {
+      elem <- coverage[[i]]
+      srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
+      lines_match <- srcref[1] == location$first_line && srcref[3] == location$last_line
+      cols_match <- srcref[2] == location$first_column && srcref[4] == location$last_column
       if (lines_match && cols_match) {
-        covr_info[i, "flowr_id"] <<- node$info$id
+        elem$flowr_id <- node$info$id
+        coverage[[i]] <<- elem
       }
     }
   })
-  return(covr_info)
+  return(coverage)
+}
+
+remove_ids_from_coverage <- function(coverage) {
+  for (i in seq_along(coverage)) {
+    elem <- coverage[[i]]
+    elem$flowr_id <- NULL
+    coverage[[i]] <- elem
+  }
+  return(coverage)
+}
+
+as_slicing_coverage <- function(coverage, exec_and_slc_ids) {
+  for (i in seq_along(coverage)) {
+    elem <- coverage[[i]]
+    elem$value <- if (elem$flowr_id %in% exec_and_slc_ids) 1 else 0
+    coverage[[i]] <- elem
+  }
+  return(coverage)
 }
 
 #' Calculate slicing coverage for a set of files
@@ -54,13 +73,22 @@ file_coverage <- function(
 
   result <- with_connection(function(con) {
     ana_res <- request_file_analysis(con, c(source_files, test_files))
-    criteria <- vector()
-    visit_nodes(ana_res$res$results$normalize, function(node) {
-      # TODO: currently, the AST only contains nodes for one file, so this is buggy :(
-      if (node$type == "RFunctionCall" && node$named && node$functionName$content == "expect_equal") {
-        criteria <<- append(criteria, sprintf("$%s", node$info$id))
+
+    criteria <- Reduce(function(a, v) {
+      elem <- v[[2]]
+      if (elem$tag != "function-call" || !is_assertion(elem, ana_res$filetoken, ana_res$res$results$normalize)) {
+        return(a)
       }
-    })
+      return(append(a, sprintf("$%s", elem$id)))
+    }, ana_res$res$results$dataflow$graph$vertexInformation, vector())
+
+    if (length(criteria) == 0) {
+      return(list(
+        ast = ana_res$res$results$normalize,
+        slice = NULL
+      ))
+    }
+
     slc_res <- request_slice(con, ana_res$filetoken, criteria)
     return(list(
       ast = ana_res$res$results$normalize,
@@ -68,24 +96,26 @@ file_coverage <- function(
     ))
   })
 
-  covr_res <- covr::file_coverage(
+  coverage <- covr::file_coverage(
     source_files = source_files,
     test_files = test_files,
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions
   )
 
-  df <- add_ids_to_corv_info(as.data.frame(covr_res), result$ast)
+  coverage_with_ids <- add_ids_to_coverage(coverage, result$ast)
 
-  set_executable <- df$flowr_id
-  set_executed <- subset(df, value == 1)$flowr_id
-  set_slice <- unlist(result$slice$result)
+  set_executed <- Filter(function(x) {
+    return(x$value == 1)
+  }, coverage_with_ids)
+  set_slice <- if (!is.null(result$slice)) unlist(result$slice$result) else vector()
   set_exec_and_slice <- intersect(set_executed, set_slice)
-  score <- length(set_exec_and_slice) / length(set_executable)
 
-  print(set_executable)
-  print(set_executed)
-  print(set_slice)
-  print(set_exec_and_slice)
-  print(sprintf("%f%%", score * 100))
+  slicing_coverage <- as_slicing_coverage(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_coverage()
+
+  # TODO: remove later for compatibility with covr (currently it's useful for 'debugging')
+  return(list(
+    original = coverage,
+    slicing = slicing_coverage
+  ))
 }
