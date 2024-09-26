@@ -73,6 +73,9 @@ file_coverage <- function(
 
   result <- with_connection(function(con) {
     ana_res <- request_file_analysis(con, c(source_files, test_files))
+    if (!is.null(ana_res$error)) {
+      handle_flowr_error(ana_res$error)
+    }
 
     criteria <- Reduce(function(a, v) {
       elem <- v[[2]]
@@ -90,6 +93,10 @@ file_coverage <- function(
     }
 
     slc_res <- request_slice(con, ana_res$filetoken, criteria)
+    if (!is.null(slc_res$error)) {
+      handle_flowr_error(slc_res$error)
+    }
+
     return(list(
       ast = ana_res$res$results$normalize,
       slice = slc_res$res$results$slice

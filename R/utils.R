@@ -16,3 +16,8 @@ with_connection <- function(f) {
   res <- f(con)
   return(res)
 }
+
+handle_flowr_error <- function(err) {
+  # TODO: or should we maybe fall back to covr's output if there's an error?
+  stop(err)
+}
