@@ -21,3 +21,11 @@ handle_flowr_error <- function(err) {
   # TODO: or should we maybe fall back to covr's output if there's an error?
   stop(err)
 }
+
+get_flowr_id <- function(coverage_info) {
+  return(coverage_info$flowr_id)
+}
+
+was_executed <- function(coverage_info) {
+  return(coverage_info$value == 1)
+}

@@ -112,9 +112,7 @@ file_coverage <- function(
 
   coverage_with_ids <- add_ids_to_coverage(coverage, result$ast)
 
-  set_executed <- Filter(function(x) {
-    return(x$value == 1)
-  }, coverage_with_ids)
+  set_executed <- Filter(was_executed, coverage_with_ids) |> lapply(get_flowr_id) |> unname() |> unlist()
   set_slice <- if (!is.null(result$slice)) unlist(result$slice$result) else vector()
   set_exec_and_slice <- intersect(set_executed, set_slice)
 
