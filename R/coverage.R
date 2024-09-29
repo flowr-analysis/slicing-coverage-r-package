@@ -17,7 +17,7 @@ get_location <- function(node) {
   ))
 }
 
-add_ids_to_coverage <- function(coverage, ast) {
+add_ids_to_cov <- function(coverage, ast) {
   visit_nodes(ast, function(node) {
     location <- get_location(node)
     if (is.null(location)) {
@@ -38,7 +38,7 @@ add_ids_to_coverage <- function(coverage, ast) {
   return(coverage)
 }
 
-remove_ids_from_coverage <- function(coverage) {
+remove_ids_from_cov <- function(coverage) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
     elem$flowr_id <- NULL
@@ -110,13 +110,13 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  coverage_with_ids <- add_ids_to_coverage(coverage, result$ast)
+  coverage_with_ids <- add_ids_to_cov(coverage, result$ast)
 
   set_executed <- Filter(was_executed, coverage_with_ids) |> lapply(get_flowr_id) |> unname() |> unlist()
   set_slice <- if (!is.null(result$slice)) unlist(result$slice$result) else vector()
   set_exec_and_slice <- intersect(set_executed, set_slice)
 
-  slicing_coverage <- as_slicing_coverage(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_coverage()
+  slicing_coverage <- as_slicing_coverage(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_cov()
 
   # TODO: remove later for compatibility with covr (currently it's useful for 'debugging')
   return(list(
