@@ -17,6 +17,14 @@ with_connection <- function(f) {
   return(res)
 }
 
+is_assertion <- function(vertex, filetoken, ast) {
+  name <- vertex$name
+  if (startsWith(name, "expect_")) {
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
 handle_flowr_error <- function(err) {
   # TODO: or should we maybe fall back to covr's output if there's an error?
   stop(err)
