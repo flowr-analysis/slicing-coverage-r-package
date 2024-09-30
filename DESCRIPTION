@@ -15,7 +15,6 @@ License: GPL (>= 3)
 Imports:
     covr (>= 3.0.0),
     flowr,
-    jsonlite (>= 1.8.0),
     logger (>= 0.3.0)
 Suggests:
     testthat (>= 3.0.0)

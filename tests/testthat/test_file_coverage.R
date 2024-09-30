@@ -8,5 +8,5 @@ test_that("slicing coverage equals normal coverage for simple inputs", {
   x <- covr::file_coverage(c(file), c(test))
   y <- slicingCoverage::file_coverage(c(file), c(test))
 
-  expect_equal(percent_coverage(x), percent_coverage(y$slicing))
+  expect_equal(covr::percent_coverage(x), covr::percent_coverage(y$slicing))
 })

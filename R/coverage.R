@@ -1,6 +1,3 @@
-library(covr)
-library(flowr)
-
 get_location <- function(node) {
   if ("fullRange" %in% names(node$info)) {
     location <- node$info$fullRange
@@ -18,7 +15,7 @@ get_location <- function(node) {
 }
 
 add_ids_to_cov <- function(coverage, ast) {
-  visit_nodes(ast, function(node) {
+  flowr::visit_nodes(ast, function(node) {
     location <- get_location(node)
     if (is.null(location)) {
       return()
@@ -72,7 +69,7 @@ file_coverage <- function(
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
   result <- with_connection(function(con) {
-    ana_res <- request_file_analysis(con, c(source_files, test_files))
+    ana_res <- flowr::request_file_analysis(con, c(source_files, test_files))
     if (!is.null(ana_res$error)) {
       handle_flowr_error(ana_res$error)
     }
@@ -92,7 +89,7 @@ file_coverage <- function(
       ))
     }
 
-    slc_res <- request_slice(con, ana_res$filetoken, criteria)
+    slc_res <- flowr::request_slice(con, ana_res$filetoken, criteria)
     if (!is.null(slc_res$error)) {
       handle_flowr_error(slc_res$error)
     }

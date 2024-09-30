@@ -1,9 +1,7 @@
-library(flowr)
-
 make_connection_funs <- function(con = NULL) {
   get_connection <- function() {
     if (is.null(con)) {
-      con_res <- connect(get_option("flowr_host"), get_option("flowr_port"))
+      con_res <- flowr::connect(get_option("flowr_host"), get_option("flowr_port"))
       con <<- con_res$connection
     }
     return(con)

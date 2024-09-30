@@ -1,11 +1,9 @@
-library(logger)
-
 log_level <- Sys.getenv("LOG_LEVEL", unset = "INFO")
 
 create_new_logger <- function(name) {
   layout <- function(...) {
-    sprintf("[%s] %s", name, layout_simple(...))
+    sprintf("[%s] %s", name, logger::layout_simple(...))
   }
 
-  return(logger(log_level, formatter_sprintf, layout, appender_console))
+  return(logger::logger(log_level, logger::formatter_sprintf, layout, logger::appender_console))
 }
