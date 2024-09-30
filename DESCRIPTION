@@ -17,7 +17,8 @@ Imports:
     flowr,
     logger (>= 0.3.0)
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Remotes:
     flowr=flowr-analysis/flowr-r-adapter
 Config/testthat/edition: 3
