@@ -115,9 +115,5 @@ file_coverage <- function(
 
   slicing_coverage <- as_slicing_coverage(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_cov()
 
-  # TODO: remove later for compatibility with covr (currently it's useful for 'debugging')
-  return(list(
-    original = coverage,
-    slicing = slicing_coverage
-  ))
+  return(slicing_coverage)
 }
