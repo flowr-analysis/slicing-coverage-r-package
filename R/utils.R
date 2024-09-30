@@ -1,15 +1,29 @@
 library(flowr)
 
-make_get_connection <- function(con = NULL) {
-  function() {
+make_connection_funs <- function(con = NULL) {
+  get_connection <- function() {
     if (is.null(con)) {
       con_res <- connect(get_option("flowr_host"), get_option("flowr_port"))
       con <<- con_res$connection
     }
     return(con)
   }
+  close_connection <- function() {
+    if (is.null(con)) {
+      return()
+    }
+    close(con)
+    con <<- NULL
+  }
+  return(list(
+    get_connection = get_connection,
+    close_connection = close_connection
+  ))
 }
-get_connection <- make_get_connection()
+
+connection_funs <- make_connection_funs()
+get_connection <- connection_funs$get_connection
+close_connection <- connection_funs$close_connection
 
 with_connection <- function(f) {
   con <- get_connection()
