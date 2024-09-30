@@ -1,4 +1,4 @@
 library(testthat)
-library(slicingCoverage) # nolint: missing_package_linter.
+library(slicingCoverage) # nolint: unused_import_linter.
 
 test_check("slicingCoverage")
