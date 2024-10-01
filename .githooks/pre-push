@@ -1,6 +1,24 @@
 #!/bin/sh
-root_dir=$(git rev-parse --show-toplevel)
-tempdir=$(mktemp -d)
-cd $tempdir
-git clone $root_dir . --quiet
+
+cleanup() {
+  if [ -n "$project_location" ] && [ "$project_location" != "$original_project_location" ]; then
+    echo "Cleaning up copy under $project_location"
+    rm -rf $project_location
+  fi
+  cd $original_dir
+}
+
+project_location=$(git rev-parse --show-toplevel)
+original_project_location=$project_location
+original_dir=$(pwd)
+
+if [ -n "$(git status --porcelain)" ]; then
+  trap cleanup EXIT
+  project_location=$(mktemp -d)
+  echo "Uncommitted changes in project. Creating a temporary copy at $project_location"
+  git clone $original_project_location $project_location --quiet
+fi
+
+cd $project_location
+
 Rscript -e "devtools::test(stop_on_failure=TRUE)"
