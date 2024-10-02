@@ -74,12 +74,15 @@ file_coverage <- function(
       handle_flowr_error(ana_res$error)
     }
 
+    # FIXME: we only want to search in the test files, do we?
+    check_function_ids <- get_check_function_ids(ana_res$filetoken)
+
     criteria <- Reduce(function(a, v) {
       elem <- v[[2]]
-      if (elem$tag != "function-call" || !is_assertion(elem, ana_res$filetoken, ana_res$res$results$normalize)) {
-        return(a)
+      if (elem$id %in% check_function_ids) {
+        a <- append(a, sprintf("$%s", elem$id))
       }
-      return(append(a, sprintf("$%s", elem$id)))
+      return(a)
     }, ana_res$res$results$dataflow$graph$vertexInformation, vector())
 
     if (length(criteria) == 0) {

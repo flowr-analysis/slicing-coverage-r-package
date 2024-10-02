@@ -29,12 +29,38 @@ with_connection <- function(f) {
   return(res)
 }
 
-is_assertion <- function(vertex, filetoken, ast) {
-  name <- vertex$name
-  if (startsWith(name, "expect_")) {
-    return(TRUE)
-  }
-  return(FALSE)
+get_check_function_ids <- function(filetoken) {
+  with_connection(function(con) {
+    query <- list(list(
+      type = "compound",
+      query = "call-context",
+      commonArguments = list(
+        kind = "check",
+        callTargets = "global"
+      ),
+      arguments = list(
+        list(
+          type = "call-context",
+          callName = "^expect_.*$",
+          subkind = "except"
+        )
+      )
+    ))
+
+    res <- flowr::request_query(con, filetoken, query)
+    if (!is.null(res$error)) {
+      handle_flowr_error(res$error)
+    }
+
+    call_context <- res$res$results[["call-context"]]
+    ids <- lapply(call_context$kinds, function(kind) {
+      lapply(kind$subkinds, function(subkind) {
+        lapply(subkind, function(elem) elem$id)
+      })
+    }) |> uneverything()
+
+    return(ids)
+  })
 }
 
 handle_flowr_error <- function(err) {
