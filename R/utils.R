@@ -49,3 +49,7 @@ get_flowr_id <- function(coverage_info) {
 was_executed <- function(coverage_info) {
   return(coverage_info$value == 1)
 }
+
+uneverything <- function(x) {
+  return(unlist(x) |> unname())
+}
