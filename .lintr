@@ -18,7 +18,7 @@ linters:linters_with_defaults(
   nested_ifelse_linter(),
   nonportable_path_linter(),
   numeric_leading_zero_linter(),
-  object_length_linter(20),
+  object_length_linter(25),
   object_name_linter(c("snake_case", "symbols")),
   object_usage_linter(),
   paren_body_linter(),
