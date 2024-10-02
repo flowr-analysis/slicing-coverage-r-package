@@ -48,9 +48,7 @@ get_check_function_ids <- function(filetoken) {
     ))
 
     res <- flowr::request_query(con, filetoken, query)
-    if (!is.null(res$error)) {
-      handle_flowr_error(res$error)
-    }
+    verify_flowr_response(res)
 
     call_context <- res$res$results[["call-context"]]
     ids <- lapply(call_context$kinds, function(kind) {
@@ -66,6 +64,13 @@ get_check_function_ids <- function(filetoken) {
 handle_flowr_error <- function(err) {
   # TODO: or should we maybe fall back to covr's output if there's an error?
   stop(err)
+}
+
+verify_flowr_response <- function(res) {
+  error <- res$error
+  if (!is.null(error)) {
+    handle_flowr_error(error)
+  }
 }
 
 get_flowr_id <- function(coverage_info) {

@@ -70,9 +70,7 @@ file_coverage <- function(
 
   result <- with_connection(function(con) {
     ana_res <- flowr::request_file_analysis(con, c(source_files, test_files))
-    if (!is.null(ana_res$error)) {
-      handle_flowr_error(ana_res$error)
-    }
+    verify_flowr_response(ana_res)
 
     # FIXME: we only want to search in the test files, do we?
     check_function_ids <- get_check_function_ids(ana_res$filetoken)
@@ -93,9 +91,7 @@ file_coverage <- function(
     }
 
     slc_res <- flowr::request_slice(con, ana_res$filetoken, criteria)
-    if (!is.null(slc_res$error)) {
-      handle_flowr_error(slc_res$error)
-    }
+    verify_flowr_response(slc_res)
 
     return(list(
       ast = ana_res$res$results$normalize,
