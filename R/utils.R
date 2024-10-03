@@ -83,3 +83,15 @@ was_executed <- function(coverage_info) {
 uneverything <- function(x) {
   return(unlist(x) |> unname())
 }
+
+get_pkg_source_files <- function(pkg) {
+  path <- file.path(pkg, "R")
+  files <- list.files(path, pattern = "\\.R$", full.names = TRUE) |> normalizePath()
+  return(files)
+}
+
+get_pkg_test_files <- function(pkg) {
+  path <- file.path(pkg, "tests")
+  files <- list.files(path, pattern = "\\.R$", full.names = TRUE, recursive = TRUE) |> normalizePath()
+  return(files)
+}

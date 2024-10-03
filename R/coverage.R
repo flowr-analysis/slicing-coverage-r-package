@@ -129,3 +129,20 @@ file_coverage <- function(
   slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
   return(slicing_coverage)
 }
+
+#' Calculate slicing coverage for a package
+#'
+#' @param path Path to the package
+#'
+#' @export
+package_coverage <- function(path = ".") {
+  source_files <- get_pkg_source_files(path)
+  test_files <- get_pkg_test_files(path)
+
+  result <- retrieve_ast_and_slice(source_files, test_files)
+
+  coverage <- covr::package_coverage(path = path)
+
+  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
+  return(slicing_coverage)
+}
