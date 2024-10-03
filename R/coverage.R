@@ -44,13 +44,62 @@ remove_ids_from_coverage <- function(coverage) {
   return(coverage)
 }
 
-as_slicing_coverage <- function(coverage, exec_and_slc_ids) {
+recalculate_values <- function(coverage, exec_and_slc_ids) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
     elem$value <- if (elem$flowr_id %in% exec_and_slc_ids) 1 else 0
     coverage[[i]] <- elem
   }
   return(coverage)
+}
+
+gather_slicing_criteria <- function(filetoken, ast) {
+  # FIXME: we only want to search in the test files, do we?
+  check_function_ids <- get_check_function_ids(filetoken)
+  criteria <- vector()
+  flowr::visit_nodes(ast, function(node) {
+    if (node$info$id %in% check_function_ids) {
+      criteria <- c(criteria, sprintf("$%s", node$info$id))
+    }
+  })
+  return(criteria)
+}
+
+as_slicing_coverage <- function(coverage, ast, slice) {
+  coverage_with_ids <- add_ids_to_coverage(coverage, ast)
+
+  set_executed <- Filter(was_executed, coverage_with_ids) |>
+    lapply(get_flowr_id) |>
+    uneverything()
+  set_slice <- unlist(slice)
+  set_exec_and_slice <- intersect(set_executed, set_slice)
+
+  slicing_coverage <- recalculate_values(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_coverage()
+
+  return(slicing_coverage)
+}
+
+retrieve_ast_and_slice <- function(source_files, test_files) {
+  result <- with_connection(function(con) {
+    ana_res <- flowr::request_file_analysis(con, c(source_files, test_files)) |> verify_flowr_response()
+    criteria <- gather_slicing_criteria(ana_res$filetoken, ana_res$res$results$normalize)
+
+    if (length(criteria) == 0) {
+      return(list(
+        ast = ana_res$res$results$normalize,
+        slice = list(result = vector())
+      ))
+    }
+
+    slc_res <- flowr::request_slice(con, ana_res$filetoken, criteria) |> verify_flowr_response()
+
+    return(list(
+      ast = ana_res$res$results$normalize,
+      slice = slc_res$res$results$slice
+    ))
+  })
+
+  return(result)
 }
 
 #' Calculate slicing coverage for a set of files
@@ -68,36 +117,7 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
-  result <- with_connection(function(con) {
-    ana_res <- flowr::request_file_analysis(con, c(source_files, test_files))
-    verify_flowr_response(ana_res)
-
-    # FIXME: we only want to search in the test files, do we?
-    check_function_ids <- get_check_function_ids(ana_res$filetoken)
-
-    criteria <- Reduce(function(a, v) {
-      elem <- v[[2]]
-      if (elem$id %in% check_function_ids) {
-        a <- append(a, sprintf("$%s", elem$id))
-      }
-      return(a)
-    }, ana_res$res$results$dataflow$graph$vertexInformation, vector())
-
-    if (length(criteria) == 0) {
-      return(list(
-        ast = ana_res$res$results$normalize,
-        slice = NULL
-      ))
-    }
-
-    slc_res <- flowr::request_slice(con, ana_res$filetoken, criteria)
-    verify_flowr_response(slc_res)
-
-    return(list(
-      ast = ana_res$res$results$normalize,
-      slice = slc_res$res$results$slice
-    ))
-  })
+  result <- retrieve_ast_and_slice(source_files, test_files)
 
   coverage <- covr::file_coverage(
     source_files = source_files,
@@ -106,15 +126,6 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  coverage_with_ids <- add_ids_to_coverage(coverage, result$ast)
-
-  set_executed <- Filter(was_executed, coverage_with_ids) |>
-    lapply(get_flowr_id) |>
-    uneverything()
-  set_slice <- if (!is.null(result$slice)) unlist(result$slice$result) else vector()
-  set_exec_and_slice <- intersect(set_executed, set_slice)
-
-  slicing_coverage <- as_slicing_coverage(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_coverage()
-
+  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
   return(slicing_coverage)
 }

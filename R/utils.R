@@ -47,9 +47,7 @@ get_check_function_ids <- function(filetoken) {
       )
     ))
 
-    res <- flowr::request_query(con, filetoken, query)
-    verify_flowr_response(res)
-
+    res <- flowr::request_query(con, filetoken, query) |> verify_flowr_response()
     call_context <- res$res$results[["call-context"]]
     ids <- lapply(call_context$kinds, function(kind) {
       lapply(kind$subkinds, function(subkind) {
@@ -69,8 +67,9 @@ handle_flowr_error <- function(err) {
 verify_flowr_response <- function(res) {
   error <- res$error
   if (!is.null(error)) {
-    handle_flowr_error(error)
+    return(handle_flowr_error(error))
   }
+  return(res)
 }
 
 get_flowr_id <- function(coverage_info) {
