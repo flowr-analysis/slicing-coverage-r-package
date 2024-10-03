@@ -130,6 +130,24 @@ file_coverage <- function(
   return(slicing_coverage)
 }
 
+#' Calculate slicing coverage for code directly
+#'
+#' @param source_files Character vector of source files with function definitions to measure coverage
+#' @param test_files Character vector of test files with code to test the functions
+#'
+#' @export
+code_covergae <- function(source_files, test_files) {
+  result <- retrieve_ast_and_slice(source_files, test_files)
+
+  coverage <- covr::code_coverage(
+    source_files = source_files,
+    test_files = test_files
+  )
+
+  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
+  return(slicing_coverage)
+}
+
 #' Calculate slicing coverage for a package
 #'
 #' @param path Path to the package
