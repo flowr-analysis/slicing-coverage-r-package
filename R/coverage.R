@@ -1,10 +1,10 @@
 add_ids_to_coverage <- function(coverage) {
-  nodes <- get_all_nodes()
-  for (id in names(nodes)) {
-    location <- get_location(nodes[[id]])
-    if (is.null(location)) {
-      next
-    }
+  nodes <- lapply(get_all_nodes(), function(node) list(id = node$info$id, location = get_location(node)))
+  nodes <- Filter(function(x) !is.null(x$location), nodes)
+
+  for (node in nodes) {
+    location <- node$location
+    id <- node$id
 
     # TODO: this can definitely be optimized
     for (i in seq_along(coverage)) {

@@ -86,9 +86,7 @@ get_all_nodes <- function() {
     query <- list(list(type = "id-map"))
     res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
     map <- res$res$results[["id-map"]]$idMap$k2v
-    # I noticed the id (key in map) can be different from node$info$id?! I don't get it
-    # This is why the names (ids) are not mapped to `[[`, 1
-    return(setNames(lapply(map, `[[`, 2), lapply(map, function(node) node[[2]]$info$id)))
+    return(setNames(lapply(map, `[[`, 2), lapply(map, `[[`, 1)))
   })
 }
 
