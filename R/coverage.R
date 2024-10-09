@@ -56,12 +56,7 @@ recalculate_values <- function(coverage, exec_and_slc_ids) {
 gather_slicing_criteria <- function(filetoken, ast) {
   # FIXME: we only want to search in the test files, do we?
   check_function_ids <- get_check_function_ids(filetoken)
-  criteria <- vector()
-  flowr::visit_nodes(ast, function(node) {
-    if (node$info$id %in% check_function_ids) {
-      criteria <- c(criteria, sprintf("$%s", node$info$id))
-    }
-  })
+  criteria <- lapply(check_function_ids, function(id) sprintf("$%s", id))
   return(criteria)
 }
 
