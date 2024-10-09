@@ -29,7 +29,29 @@ with_connection <- function(f) {
   return(res)
 }
 
-get_check_function_ids <- function(filetoken) {
+make_analysis_info_funs <- function(filetoken = NULL) {
+  return(list(
+    init_analysis = function(files) {
+      with_connection(function(con) {
+        res <- flowr::request_file_analysis(con, files) |> verify_flowr_response()
+        filetoken <<- res$filetoken
+        return()
+      })
+    },
+    get_filetoken = function() {
+      if (is.null(filetoken)) {
+        stop("analysis session is not initialized")
+      }
+      return(filetoken)
+    }
+  ))
+}
+
+analysis_info_funs <- make_analysis_info_funs()
+init_analysis <- analysis_info_funs$init_analysis
+get_filetoken <- analysis_info_funs$get_filetoken
+
+get_check_function_ids <- function() {
   with_connection(function(con) {
     query <- list(list(
       type = "compound",
@@ -47,7 +69,7 @@ get_check_function_ids <- function(filetoken) {
       )
     ))
 
-    res <- flowr::request_query(con, filetoken, query) |> verify_flowr_response()
+    res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
     call_context <- res$res$results[["call-context"]]
     ids <- lapply(call_context$kinds, function(kind) {
       lapply(kind$subkinds, function(subkind) {
@@ -56,6 +78,17 @@ get_check_function_ids <- function(filetoken) {
     }) |> uneverything()
 
     return(ids)
+  })
+}
+
+get_all_nodes <- function() {
+  with_connection(function(con) {
+    query <- list(list(type = "id-map"))
+    res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
+    map <- res$res$results[["id-map"]]$idMap$k2v
+    # I noticed the id (key in map) can be different from node$info$id?! I don't get it
+    # This is why the names (ids) are not mapped to `[[`, 1
+    return(setNames(lapply(map, `[[`, 2), lapply(map, function(node) node[[2]]$info$id)))
   })
 }
 
@@ -94,4 +127,20 @@ get_pkg_test_files <- function(pkg) {
   path <- file.path(pkg, "tests")
   files <- list.files(path, pattern = "\\.R$", full.names = TRUE, recursive = TRUE) |> normalizePath()
   return(files)
+}
+
+get_location <- function(node) {
+  if ("fullRange" %in% names(node$info)) {
+    location <- node$info$fullRange
+  } else if ("location" %in% names(node)) {
+    location <- node$location
+  } else {
+    return(NULL)
+  }
+  return(list(
+    first_line = location[[1]],
+    first_column = location[[2]],
+    last_line = location[[3]],
+    last_column = location[[4]]
+  ))
 }

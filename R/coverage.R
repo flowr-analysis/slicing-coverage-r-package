@@ -1,37 +1,24 @@
-get_location <- function(node) {
-  if ("fullRange" %in% names(node$info)) {
-    location <- node$info$fullRange
-  } else if ("location" %in% names(node)) {
-    location <- node$location
-  } else {
-    return(NULL)
-  }
-  return(list(
-    first_line = location[1],
-    first_column = location[2],
-    last_line = location[3],
-    last_column = location[4]
-  ))
-}
-
-add_ids_to_coverage <- function(coverage, ast) {
-  flowr::visit_nodes(ast, function(node) {
-    location <- get_location(node)
+add_ids_to_coverage <- function(coverage) {
+  nodes <- get_all_nodes()
+  for (id in names(nodes)) {
+    location <- get_location(nodes[[id]])
     if (is.null(location)) {
-      return()
+      next
     }
 
+    # TODO: this can definitely be optimized
     for (i in seq_along(coverage)) {
       elem <- coverage[[i]]
       srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
       lines_match <- srcref[1] == location$first_line && srcref[3] == location$last_line
       cols_match <- srcref[2] == location$first_column && srcref[4] == location$last_column
       if (lines_match && cols_match) {
-        elem$flowr_id <- node$info$id
-        coverage[[i]] <<- elem
+        elem$flowr_id <- id
+        coverage[[i]] <- elem
       }
     }
-  })
+  }
+
   return(coverage)
 }
 
@@ -53,15 +40,15 @@ recalculate_values <- function(coverage, exec_and_slc_ids) {
   return(coverage)
 }
 
-gather_slicing_criteria <- function(filetoken, ast) {
+gather_slicing_criteria <- function() {
   # FIXME: we only want to search in the test files, do we?
-  check_function_ids <- get_check_function_ids(filetoken)
+  check_function_ids <- get_check_function_ids()
   criteria <- lapply(check_function_ids, function(id) sprintf("$%s", id))
   return(criteria)
 }
 
-as_slicing_coverage <- function(coverage, ast, slice) {
-  coverage_with_ids <- add_ids_to_coverage(coverage, ast)
+as_slicing_coverage <- function(coverage, slice) {
+  coverage_with_ids <- add_ids_to_coverage(coverage)
 
   set_executed <- Filter(was_executed, coverage_with_ids) |>
     lapply(get_flowr_id) |>
@@ -74,27 +61,19 @@ as_slicing_coverage <- function(coverage, ast, slice) {
   return(slicing_coverage)
 }
 
-retrieve_ast_and_slice <- function(source_files, test_files) {
+retrieve_slice <- function(source_files, test_files) {
+  criteria <- gather_slicing_criteria()
+
+  if (length(criteria) == 0) {
+    return(list(result = vector()))
+  }
+
   result <- with_connection(function(con) {
-    ana_res <- flowr::request_file_analysis(con, c(source_files, test_files)) |> verify_flowr_response()
-    criteria <- gather_slicing_criteria(ana_res$filetoken, ana_res$res$results$normalize)
-
-    if (length(criteria) == 0) {
-      return(list(
-        ast = ana_res$res$results$normalize,
-        slice = list(result = vector())
-      ))
-    }
-
-    slc_res <- flowr::request_slice(con, ana_res$filetoken, criteria) |> verify_flowr_response()
-
-    return(list(
-      ast = ana_res$res$results$normalize,
-      slice = slc_res$res$results$slice
-    ))
+    slc_res <- flowr::request_slice(con, get_filetoken(), criteria) |> verify_flowr_response()
+    return(slc_res$res$results$slice)
   })
 
-  return(result)
+  return(result$result)
 }
 
 #' Calculate slicing coverage for a set of files
@@ -112,8 +91,9 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
-  result <- retrieve_ast_and_slice(source_files, test_files)
+  init_analysis(c(source_files, test_files))
 
+  slice <- retrieve_slice(source_files, test_files)
   coverage <- covr::file_coverage(
     source_files = source_files,
     test_files = test_files,
@@ -121,7 +101,7 @@ file_coverage <- function(
     function_exclusions = function_exclusions
   )
 
-  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
+  slicing_coverage <- as_slicing_coverage(coverage, slice)
   return(slicing_coverage)
 }
 
@@ -132,14 +112,15 @@ file_coverage <- function(
 #'
 #' @export
 code_covergae <- function(source_files, test_files) {
-  result <- retrieve_ast_and_slice(source_files, test_files)
+  init_analysis(c(source_files, test_files))
 
+  slice <- retrieve_slice(source_files, test_files)
   coverage <- covr::code_coverage(
     source_files = source_files,
     test_files = test_files
   )
 
-  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
+  slicing_coverage <- as_slicing_coverage(coverage, slice)
   return(slicing_coverage)
 }
 
@@ -152,10 +133,11 @@ package_coverage <- function(path = ".") {
   source_files <- get_pkg_source_files(path)
   test_files <- get_pkg_test_files(path)
 
-  result <- retrieve_ast_and_slice(source_files, test_files)
+  init_analysis(c(source_files, test_files))
 
+  slice <- retrieve_slice(source_files, test_files)
   coverage <- covr::package_coverage(path = path)
 
-  slicing_coverage <- as_slicing_coverage(coverage, result$ast, result$slice)
+  slicing_coverage <- as_slicing_coverage(coverage, slice)
   return(slicing_coverage)
 }
