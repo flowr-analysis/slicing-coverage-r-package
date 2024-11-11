@@ -62,7 +62,6 @@ get_check_function_ids <- function() {
       ),
       arguments = list(
         list(
-          type = "call-context",
           callName = "^expect_.*$",
           subkind = "except"
         )
