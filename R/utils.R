@@ -57,15 +57,9 @@ get_check_function_ids <- function() {
       type = "compound",
       query = "call-context",
       commonArguments = list(
-        kind = "check",
         callTargets = "global"
       ),
-      arguments = list(
-        list(
-          callName = "^expect_.*$",
-          subkind = "except"
-        )
-      )
+      arguments = get_all_groups() |> combine_groups()
     ))
 
     res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
