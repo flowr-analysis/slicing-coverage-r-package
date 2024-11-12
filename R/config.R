@@ -22,7 +22,7 @@ configure <- function(flowr_host = NULL, flowr_port = NULL, measure_time = NULL)
     option_env$flowr_port <- flowr_port
   }
   if (!missing(measure_time)) {
-    options_env$flowr_port <- measure_time
+    option_env$measure_time <- measure_time
   }
 }
 
