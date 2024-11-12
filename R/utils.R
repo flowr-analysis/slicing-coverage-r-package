@@ -135,3 +135,16 @@ get_location <- function(node) {
     last_column = location[[4]]
   ))
 }
+
+measure <- function(expr) {
+  s <- substitute(expr, parent.frame())
+  # TODO: do we want to run gc here, or does it take too much time
+  start_time <- proc.time()[[3]]
+  res <- eval(s)
+  end_time <- proc.time()[[3]]
+  elapsed_time <- end_time - start_time
+  return(list(
+    result = res,
+    elapsed_time = elapsed_time
+  ))
+}

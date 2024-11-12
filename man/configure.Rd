@@ -5,7 +5,7 @@
 \title{Configures various options for this package. If no value is given for any
 option, it's default is used.}
 \usage{
-configure(flowr_host = NULL, flowr_port = NULL)
+configure(flowr_host = NULL, flowr_port = NULL, measure_time = NULL)
 }
 \arguments{
 \item{flowr_host}{The host where the flowr server is running. Defaults to
@@ -13,6 +13,9 @@ configure(flowr_host = NULL, flowr_port = NULL)
 
 \item{flowr_port}{The port where the flowr server is running. Defaults to
 1042.}
+
+\item{measure_time}{Whether to measure the execution time of different
+calculations. Defaults to FALSE.}
 }
 \description{
 Configures various options for this package. If no value is given for any

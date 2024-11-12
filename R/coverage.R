@@ -91,18 +91,32 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
-  init_analysis(c(source_files, test_files))
-
-  slice <- retrieve_slice(source_files, test_files)
-  coverage <- covr::file_coverage(
+  coverage <- measure(covr::file_coverage(
     source_files = source_files,
     test_files = test_files,
     line_exclusions = line_exclusions,
     function_exclusions = function_exclusions
-  )
+  ))
 
-  slicing_coverage <- as_slicing_coverage(coverage, slice)
-  return(slicing_coverage)
+  slicing_coverage <- measure({
+    init_analysis(c(source_files, test_files))
+    slice <- retrieve_slice(source_files, test_files)
+    as_slicing_coverage(coverage$result, slice)
+  })
+
+  coverage_time <- coverage$elapsed_time
+  slicing_time <- slicing_coverage$elapsed_time
+
+  if (get_option("measure_time")) {
+    return(list(
+      coverage_time = coverage_time,
+      slicing_time = slicing_time,
+      elapsed_time = coverage_time + slicing_time,
+      coverage = slicing_coverage$result
+    ))
+  }
+
+  return(slicing_coverage$result)
 }
 
 #' Calculate slicing coverage for code directly
