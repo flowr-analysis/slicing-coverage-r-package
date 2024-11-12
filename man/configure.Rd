@@ -5,7 +5,12 @@
 \title{Configures various options for this package. If no value is given for any
 option, it's default is used.}
 \usage{
-configure(flowr_host = NULL, flowr_port = NULL, measure_time = NULL)
+configure(
+  flowr_host = NULL,
+  flowr_port = NULL,
+  measure_time = NULL,
+  return_covr_result = NULL
+)
 }
 \arguments{
 \item{flowr_host}{The host where the flowr server is running. Defaults to
@@ -16,6 +21,8 @@ configure(flowr_host = NULL, flowr_port = NULL, measure_time = NULL)
 
 \item{measure_time}{Whether to measure the execution time of different
 calculations. Defaults to FALSE.}
+
+\item{return_covr_result}{Whether to also return the coverage covr calculated}
 }
 \description{
 Configures various options for this package. If no value is given for any
