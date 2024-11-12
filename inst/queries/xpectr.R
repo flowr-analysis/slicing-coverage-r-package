@@ -1,7 +1,7 @@
 list(
   kind = "xpectr",
   parts = list(list(
-    callname = "(stop|warn)_if",
+    callName = "(stop|warn)_if",
     subkind = "what_if"
   ))
 )

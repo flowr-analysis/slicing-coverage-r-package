@@ -1,10 +1,10 @@
 list(
   kind = "R",
   parts = list(list(
-    callname = "stop",
+    callName = "stop",
     subkind = "stop"
   ), list(
-    callname = "stopifnot",
+    callName = "stopifnot",
     subkind = "stop"
   ))
 )

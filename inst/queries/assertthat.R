@@ -1,7 +1,7 @@
 list(
   kind = "assertthat",
   parts = list(list(
-    callname = "assert_that",
+    callName = "assert_that",
     subkind = "assert"
   ))
 )

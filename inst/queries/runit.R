@@ -1,7 +1,7 @@
 list(
   kind = "runit",
   parts = list(list(
-    callname = "check[A-Z][a-zA-Z]*",
+    callName = "check[A-Z][a-zA-Z]*",
     subkind = "check"
   ))
 )

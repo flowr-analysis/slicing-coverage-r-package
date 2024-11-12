@@ -1,7 +1,7 @@
 list(
   kind = "testit",
   parts = list(list(
-    callname = "assert",
+    callName = "assert",
     subkind = "assert"
   ))
 )
