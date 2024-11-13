@@ -129,6 +129,7 @@ get_location <- function(node) {
     return(NULL)
   }
   return(list(
+    file = node$info$file,
     first_line = location[[1]],
     first_column = location[[2]],
     last_line = location[[3]],
@@ -167,4 +168,22 @@ build_return_value <- function(coverage, slicing_coverage) {
   }
 
   return(slicing_coverage$result)
+}
+
+build_loc2id_key <- function(file, location = NULL, srcref = NULL) {
+  if (!missing(location)) {
+    first_line <- location$first_line
+    first_column <- location$first_column
+    last_line <- location$last_line
+    last_column <- location$last_column
+  } else if (!missing(srcref)) {
+    first_line <- srcref[1]
+    first_column <- srcref[2]
+    last_line <- srcref[3]
+    last_column <- srcref[4]
+  } else {
+    stop("Either location or srcref must be provided")
+  }
+
+  return(sprintf("%s:%d:%d:%d:%d", file, first_line, first_column, last_line, last_column))
 }

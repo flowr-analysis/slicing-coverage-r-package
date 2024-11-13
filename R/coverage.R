@@ -9,25 +9,25 @@ add_ids_to_coverage <- function(coverage) {
   location_to_id <- new.env()
   for (node in nodes) {
     location <- node$location
-    # TODO: we also need to check the file name. Two files can have elements at the exact
-    #       same location.
-    key <- sprintf("%d-%d-%d-%d", location$first_line, location$first_column, location$last_line, location$last_column)
-    if (exists(key, envir = location_to_id)) {
-      cat("Duplicate location", key, "found\n")
-    }
-    location_to_id[[key]] <- node$id
+    file <- if (!is.null(location$file)) basename(location$file) else ""
+    key <- build_loc2id_key(file, location = location)
+    location_to_id[[key]] <- c(location_to_id[[key]], node$id)
   }
 
-  for (i in seq_along(coverage)) {
-    elem <- coverage[[i]]
+  for (file_and_srcref in names(coverage)) { # something like "file.R:4:3:4:7:3:7:4:4"
+    elem <- coverage[[file_and_srcref]]
     srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
-    id <- location_to_id[[sprintf("%d-%d-%d-%d", srcref[1], srcref[2], srcref[3], srcref[4])]]
-    if (is.null(id)) {
-      cat("No node found for", elem$srcref, "\n")
+    file <- strsplit(file_and_srcref, ":")[[1]][1]
+    ids <- location_to_id[[build_loc2id_key(file, srcref = srcref)]]
+    if (is.null(ids)) {
+      ids <- location_to_id[[build_loc2id_key("", srcref = srcref)]]
+    }
+    if (is.null(ids)) {
+      cat("No node found for", file, "-", elem$srcref, "\n")
       next
     }
-    elem$flowr_id <- id
-    coverage[[i]] <- elem
+    elem$flowr_ids <- ids
+    coverage[[file_and_srcref]] <- elem
   }
 
   return(coverage)
@@ -36,7 +36,7 @@ add_ids_to_coverage <- function(coverage) {
 remove_ids_from_coverage <- function(coverage) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
-    elem$flowr_id <- NULL
+    elem$flowr_ids <- NULL
     coverage[[i]] <- elem
   }
   return(coverage)
@@ -45,11 +45,11 @@ remove_ids_from_coverage <- function(coverage) {
 recalculate_values <- function(coverage, exec_and_slc_ids) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
-    flowr_id <- elem$flowr_id
-    if (is.null(flowr_id)) { # This should not happen (see add_ids_to_coverage)
+    flowr_ids <- elem$flowr_ids
+    if (is.null(flowr_ids)) { # This should not happen (see add_ids_to_coverage)
       next
     }
-    if (flowr_id %in% exec_and_slc_ids) { # No need to change anything as element is in the slice
+    if (any(flowr_ids %in% exec_and_slc_ids)) { # No need to change anything as element is in the slice
       next
     }
 
