@@ -45,7 +45,15 @@ remove_ids_from_coverage <- function(coverage) {
 recalculate_values <- function(coverage, exec_and_slc_ids) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
-    elem$value <- if (elem$flowr_id %in% exec_and_slc_ids) 1 else 0
+    flowr_id <- elem$flowr_id
+    if (is.null(flowr_id)) { # This should not happen (see add_ids_to_coverage)
+      next
+    }
+    if (flowr_id %in% exec_and_slc_ids) { # No need to change anything as element is in the slice
+      next
+    }
+
+    elem$value <- 0
     coverage[[i]] <- elem
   }
   return(coverage)
