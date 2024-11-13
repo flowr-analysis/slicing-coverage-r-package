@@ -108,23 +108,7 @@ file_coverage <- function(
     as_slicing_coverage(coverage$result, slice)
   })
 
-  coverage_time <- coverage$elapsed_time
-  slicing_time <- slicing_coverage$elapsed_time
-
-  if (get_option("measure_time") || get_option("return_covr_result")) {
-    res <- list(coverage = slicing_coverage$result)
-    if (get_option("measure_time")) {
-      res$coverage_time <- coverage_time
-      res$slicing_time <- slicing_time
-      res$elapsed_time <- coverage_time + slicing_time
-    }
-    if (get_option("return_covr_result")) {
-      res$covr <- coverage$result
-    }
-    return(res)
-  }
-
-  return(slicing_coverage$result)
+  return(build_return_value(coverage, slicing_coverage))
 }
 
 #' Calculate slicing coverage for code directly
@@ -155,11 +139,13 @@ package_coverage <- function(path = ".") {
   source_files <- get_pkg_source_files(path)
   test_files <- get_pkg_test_files(path)
 
-  init_analysis(c(source_files, test_files))
+  coverage <- measure(covr::package_coverage(path = path))
 
-  slice <- retrieve_slice(source_files, test_files)
-  coverage <- covr::package_coverage(path = path)
+  slicing_coverage <- measure({
+    init_analysis(c(source_files, test_files))
+    slice <- retrieve_slice(source_files, test_files)
+    as_slicing_coverage(coverage, slice)
+  })
 
-  slicing_coverage <- as_slicing_coverage(coverage, slice)
-  return(slicing_coverage)
+  return(build_return_value(coverage, slicing_coverage))
 }

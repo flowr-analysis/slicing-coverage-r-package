@@ -148,3 +148,23 @@ measure <- function(expr) {
     elapsed_time = elapsed_time
   ))
 }
+
+build_return_value <- function(coverage, slicing_coverage) {
+  coverage_time <- coverage$elapsed_time
+  slicing_time <- slicing_coverage$elapsed_time
+
+  if (get_option("measure_time") || get_option("return_covr_result")) {
+    res <- list(coverage = slicing_coverage$result)
+    if (get_option("measure_time")) {
+      res$coverage_time <- coverage_time
+      res$slicing_time <- slicing_time
+      res$elapsed_time <- coverage_time + slicing_time
+    }
+    if (get_option("return_covr_result")) {
+      res$covr <- coverage$result
+    }
+    return(res)
+  }
+
+  return(slicing_coverage$result)
+}
