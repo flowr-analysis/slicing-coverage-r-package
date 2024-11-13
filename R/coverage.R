@@ -6,21 +6,28 @@ add_ids_to_coverage <- function(coverage) {
   nodes <- lapply(get_all_nodes(), function(node) list(id = node$info$id, location = get_location(node)))
   nodes <- Filter(function(x) !is.null(x$location), nodes)
 
+  location_to_id <- new.env()
   for (node in nodes) {
     location <- node$location
-    id <- node$id
-
-    # TODO: this can definitely be optimized
-    for (i in seq_along(coverage)) {
-      elem <- coverage[[i]]
-      srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
-      lines_match <- srcref[1] == location$first_line && srcref[3] == location$last_line
-      cols_match <- srcref[2] == location$first_column && srcref[4] == location$last_column
-      if (lines_match && cols_match) {
-        elem$flowr_id <- id
-        coverage[[i]] <- elem
-      }
+    # TODO: we also need to check the file name. Two files can have elements at the exact
+    #       same location.
+    key <- sprintf("%d-%d-%d-%d", location$first_line, location$first_column, location$last_line, location$last_column)
+    if (exists(key, envir = location_to_id)) {
+      cat("Duplicate location", key, "found\n")
     }
+    location_to_id[[key]] <- node$id
+  }
+
+  for (i in seq_along(coverage)) {
+    elem <- coverage[[i]]
+    srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
+    id <- location_to_id[[sprintf("%d-%d-%d-%d", srcref[1], srcref[2], srcref[3], srcref[4])]]
+    if (is.null(id)) {
+      cat("No node found for", elem$srcref, "\n")
+      next
+    }
+    elem$flowr_id <- id
+    coverage[[i]] <- elem
   }
 
   return(coverage)
