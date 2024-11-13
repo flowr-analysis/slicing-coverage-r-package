@@ -1,4 +1,8 @@
 add_ids_to_coverage <- function(coverage) {
+  if ("result" %in% names(coverage)) {
+    coverage <- coverage$result
+  }
+
   nodes <- lapply(get_all_nodes(), function(node) list(id = node$info$id, location = get_location(node)))
   nodes <- Filter(function(x) !is.null(x$location), nodes)
 
