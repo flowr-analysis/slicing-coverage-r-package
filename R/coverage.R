@@ -1,4 +1,9 @@
+log_level <- Sys.getenv("LOG_LEVEL", unset = "INFO")
+logger::log_threshold(level = log_level, namespace = "slicingCoverage")
+logger::log_formatter(logger::formatter_sprintf, namespace = "slicingCoverage")
+
 add_ids_to_coverage <- function(coverage) {
+  logger::log_trace("Merging coverage and slice", namespace = "slicingCoverage")
   if ("result" %in% names(coverage)) {
     coverage <- coverage$result
   }
@@ -14,20 +19,22 @@ add_ids_to_coverage <- function(coverage) {
     location_to_id[[key]] <- c(location_to_id[[key]], node$id)
   }
 
+  unknown_location_files <- c()
   for (file_and_srcref in names(coverage)) { # something like "file.R:4:3:4:7:3:7:4:4"
     elem <- coverage[[file_and_srcref]]
     srcref <- as.integer(elem$srcref) # line start, column start, line end, column end
     file <- strsplit(file_and_srcref, ":")[[1]][1]
     ids <- location_to_id[[build_loc2id_key(file, srcref = srcref)]]
     if (is.null(ids)) {
-      ids <- location_to_id[[build_loc2id_key("", srcref = srcref)]]
-    }
-    if (is.null(ids)) {
-      cat("No node found for", file, "-", elem$srcref, "\n")
+      unknown_location_files <- c(unknown_location_files, file)
       next
     }
     elem$flowr_ids <- ids
     coverage[[file_and_srcref]] <- elem
+  }
+
+  for (file in unique(unknown_location_files)) {
+    logger::log_warn("Locations in %s are not known to the slicer", file, namespace = "slicingCoverage")
   }
 
   return(coverage)
@@ -43,6 +50,7 @@ remove_ids_from_coverage <- function(coverage) {
 }
 
 recalculate_values <- function(coverage, exec_and_slc_ids) {
+  logger::log_trace("Adjusting coverage values", namespace = "slicingCoverage")
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
     flowr_ids <- elem$flowr_ids
@@ -84,6 +92,7 @@ retrieve_slice <- function(source_files, test_files) {
   criteria <- gather_slicing_criteria()
 
   if (length(criteria) == 0) {
+    logger::log_debug("Slice is empty", namespace = "slicingCoverage")
     return(list(result = vector()))
   }
 
@@ -110,6 +119,7 @@ file_coverage <- function(
     function_exclusions = NULL) {
   stopifnot(missing(line_exclusions), missing(function_exclusions))
 
+  logger::log_trace("Tracing coverage", namespace = "slicingCoverage")
   coverage <- measure(covr::file_coverage(
     source_files = source_files,
     test_files = test_files,

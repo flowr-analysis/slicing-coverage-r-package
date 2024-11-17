@@ -1,7 +1,10 @@
 make_connection_funs <- function(con = NULL) {
   get_connection <- function() {
     if (is.null(con)) {
-      con_res <- flowr::connect(get_option("flowr_host"), get_option("flowr_port"))
+      host <- get_option("flowr_host")
+      port <- get_option("flowr_port")
+      logger::log_debug("Opening connection to flowr on %s:%d", host, port, namespace = "slicingCoverage")
+      con_res <- flowr::connect(host, port)
       con <<- con_res$connection
     }
     return(con)
@@ -10,6 +13,7 @@ make_connection_funs <- function(con = NULL) {
     if (is.null(con)) {
       return()
     }
+    logger::log_debug("Closing connection to flowr", namespace = "slicingCoverage")
     close(con)
     con <<- NULL
   }
@@ -32,6 +36,7 @@ with_connection <- function(f) {
 make_analysis_info_funs <- function(filetoken = NULL) {
   return(list(
     init_analysis = function(files) {
+      logger::log_trace("Requesting analysis", namespace = "slicingCoverage")
       with_connection(function(con) {
         res <- flowr::request_file_analysis(con, files) |> verify_flowr_response()
         filetoken <<- res$filetoken
@@ -85,6 +90,7 @@ get_all_nodes <- function() {
 
 handle_flowr_error <- function(err) {
   # TODO: or should we maybe fall back to covr's output if there's an error?
+  logger::log_warn("Slicer returned an error: %s", err, namespace = "slicingCoverage")
   stop(err)
 }
 
