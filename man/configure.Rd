@@ -9,7 +9,8 @@ configure(
   flowr_host = NULL,
   flowr_port = NULL,
   measure_time = NULL,
-  return_covr_result = NULL
+  return_covr_result = NULL,
+  slicing_points = NULL
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ configure(
 calculations. Defaults to FALSE.}
 
 \item{return_covr_result}{Whether to also return the coverage covr calculated}
+
+\item{slicing_points}{Wether to return all slicing points we found and slices for}
 }
 \description{
 Configures various options for this package. If no value is given for any

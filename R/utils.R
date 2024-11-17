@@ -127,19 +127,31 @@ get_pkg_test_files <- function(pkg) {
 }
 
 get_location <- function(node) {
+  res <- list()
   if ("fullRange" %in% names(node$info)) {
     location <- node$info$fullRange
-  } else if ("location" %in% names(node)) {
+    res$fullRange <- list(
+      first_line = location[[1]],
+      first_column = location[[2]],
+      last_line = location[[3]],
+      last_column = location[[4]]
+    )
+  }
+  if ("location" %in% names(node)) {
     location <- node$location
+    res$location <- list(
+      first_line = location[[1]],
+      first_column = location[[2]],
+      last_line = location[[3]],
+      last_column = location[[4]]
+    )
   } else {
     return(NULL)
   }
   return(list(
     file = node$info$file,
-    first_line = location[[1]],
-    first_column = location[[2]],
-    last_line = location[[3]],
-    last_column = location[[4]]
+    fullRange = res$fullRange,
+    location = res$location
   ))
 }
 
@@ -160,8 +172,8 @@ build_return_value <- function(coverage, slicing_coverage) {
   coverage_time <- coverage$elapsed_time
   slicing_time <- slicing_coverage$elapsed_time
 
-  if (get_option("measure_time") || get_option("return_covr_result")) {
-    res <- list(coverage = slicing_coverage$result)
+  if (get_option("measure_time") || get_option("return_covr_result") || get_option("slicing_points")) {
+    res <- list(coverage = slicing_coverage$result$coverage)
     if (get_option("measure_time")) {
       res$coverage_time <- coverage_time
       res$slicing_time <- slicing_time
@@ -170,10 +182,13 @@ build_return_value <- function(coverage, slicing_coverage) {
     if (get_option("return_covr_result")) {
       res$covr <- coverage$result
     }
+    if (get_option("slicing_points")) {
+      res$slicing_points <- slicing_coverage$result$slicing_points
+    }
     return(res)
   }
 
-  return(slicing_coverage$result)
+  return(slicing_coverage$result$coverage)
 }
 
 build_loc2id_key <- function(file, location = NULL, srcref = NULL) {

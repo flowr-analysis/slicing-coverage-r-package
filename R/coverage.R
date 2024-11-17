@@ -13,8 +13,14 @@ add_ids_to_coverage <- function(coverage) {
 
   location_to_id <- new.env()
   for (node in nodes) {
-    location <- node$location
-    file <- if (!is.null(location$file)) basename(location$file) else ""
+    full_range <- node$location$fullRange
+    location <- node$location$location
+    file <- node$location$file
+    file <- if (!is.null(file)) basename(file) else ""
+    if (!is.null(full_range)) {
+      key <- build_loc2id_key(file, location = full_range)
+      location_to_id[[key]] <- c(location_to_id[[key]], node$id)
+    }
     key <- build_loc2id_key(file, location = location)
     location_to_id[[key]] <- c(location_to_id[[key]], node$id)
   }
@@ -67,11 +73,16 @@ recalculate_values <- function(coverage, exec_and_slc_ids) {
   return(coverage)
 }
 
-gather_slicing_criteria <- function() {
+gather_slicing_points <- function() {
   # FIXME: we only want to search in the test files, do we?
+  logger::log_trace("Searching for slicing points", namespace = "slicingCoverage")
   check_function_ids <- get_check_function_ids()
+  logger::log_debug("Found %d slicing points", length(check_function_ids), namespace = "slicingCoverage")
   criteria <- lapply(check_function_ids, function(id) sprintf("$%s", id))
-  return(criteria)
+  return(list(
+    criteria = criteria,
+    ids = check_function_ids
+  ))
 }
 
 as_slicing_coverage <- function(coverage, slice) {
@@ -89,19 +100,35 @@ as_slicing_coverage <- function(coverage, slice) {
 }
 
 retrieve_slice <- function(source_files, test_files) {
-  criteria <- gather_slicing_criteria()
+  slicing_points <- gather_slicing_points()
+  criteria <- slicing_points$criteria
+  slicing_points <- slicing_points$ids
 
   if (length(criteria) == 0) {
     logger::log_debug("Slice is empty", namespace = "slicingCoverage")
     return(list(result = vector()))
   }
 
-  result <- with_connection(function(con) {
-    slc_res <- flowr::request_slice(con, get_filetoken(), criteria) |> verify_flowr_response()
-    return(slc_res$res$results$slice)
-  })
+  slicice_ids <- list()
+  batch_size <- 20
+  for (i in seq(1, length(criteria), by = batch_size)) {
+    j <- min(i + batch_size, length(criteria))
+    logger::log_trace("Requesting %d of %d slices",
+      ceiling(i / batch_size),
+      ceiling(length(criteria) / batch_size),
+      namespace = "slicingCoverage"
+    )
+    result <- with_connection(function(con) {
+      slc_res <- flowr::request_slice(con, get_filetoken(), criteria[i:j]) |> verify_flowr_response()
+      return(slc_res$res$results$slice$result)
+    })
+    slicice_ids <- c(slicice_ids, result)
+  }
 
-  return(result$result)
+  return(list(
+    slice = slicice_ids,
+    slicing_points = slicing_points
+  ))
 }
 
 #' Calculate slicing coverage for a set of files
@@ -130,7 +157,12 @@ file_coverage <- function(
   slicing_coverage <- measure({
     init_analysis(c(source_files, test_files))
     slice <- retrieve_slice(source_files, test_files)
-    as_slicing_coverage(coverage$result, slice)
+    slicing_points <- slice$slicing_points
+    slc_cov <- as_slicing_coverage(coverage$result, slice$slice)
+    list(
+      coverage = slc_cov,
+      slicing_points = slicing_points
+    )
   })
 
   return(build_return_value(coverage, slicing_coverage))
@@ -164,12 +196,18 @@ package_coverage <- function(path = ".") {
   source_files <- get_pkg_source_files(path)
   test_files <- get_pkg_test_files(path)
 
+  logger::log_trace("Tracing coverage", namespace = "slicingCoverage")
   coverage <- measure(covr::package_coverage(path = path))
 
   slicing_coverage <- measure({
     init_analysis(c(source_files, test_files))
     slice <- retrieve_slice(source_files, test_files)
-    as_slicing_coverage(coverage, slice)
+    slicing_points <- slice$slicing_points
+    slc_cov <- as_slicing_coverage(coverage, slice)
+    list(
+      coverage = slc_cov,
+      slicing_points = slicing_points
+    )
   })
 
   return(build_return_value(coverage, slicing_coverage))
