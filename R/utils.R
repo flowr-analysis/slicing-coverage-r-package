@@ -165,8 +165,12 @@ add_ids_to_coverage <- function(coverage) {
   }
 
   for (type in names(unknown_locations)) {
+    num <- unknown_locations[[type]]
+    if (num <= 0) {
+      next
+    }
     logger::log_warn("%d locations in %s files are not known to the slicer",
-      unknown_locations[[type]],
+      num,
       type,
       namespace = "slicingCoverage"
     )
