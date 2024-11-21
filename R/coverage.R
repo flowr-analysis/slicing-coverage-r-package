@@ -37,5 +37,5 @@ package_coverage <- function(path = ".") {
   logger::log_trace("Tracing coverage", namespace = "slicingCoverage")
   covr_measure <- measure(covr::package_coverage(path = path))
 
-  return(give_me_covr_and_i_do_the_rest(covr_measure, sources$files, tests$files, test_path = tests$path))
+  return(give_me_covr_and_i_do_the_rest(covr_measure, sources$files, tests$files))
 }

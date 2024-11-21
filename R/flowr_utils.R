@@ -73,8 +73,8 @@ analysis_info_funs <- make_analysis_info_funs()
 init_analysis <- analysis_info_funs$init_analysis
 get_filetoken <- analysis_info_funs$get_filetoken
 
-retrieve_slice <- function(test_path = NULL) {
-  slicing_points_measure <- measure(gather_slicing_points(test_path))
+retrieve_slice <- function(file_filter = NULL) {
+  slicing_points_measure <- measure(gather_slicing_points(file_filter))
   query_time <- slicing_points_measure$elapsed_time
   slicing_points <- slicing_points_measure$result
   criteria <- slicing_points$criteria
@@ -123,11 +123,9 @@ retrieve_slice <- function(test_path = NULL) {
   ))
 }
 
-get_check_function_ids <- function(test_path = NULL) {
-  apply_filter <- !is.null(test_path) && file.exists(test_path)
-  filter <- paste0(test_path, "/*")
-  if (apply_filter) {
-    logger::log_debug("Only searching for assertions in %s", filter, namespace = "slicingCoverage")
+get_check_function_ids <- function(file_filter = NULL) {
+  if (!is.null(file_filter)) {
+    logger::log_debug("Only searching for assertions in %s", file_filter, namespace = "slicingCoverage")
   }
 
   with_connection(function(con) {
@@ -136,11 +134,11 @@ get_check_function_ids <- function(test_path = NULL) {
       query = "call-context",
       commonArguments = c(list(
         callTargets = "global"
-      ), if (apply_filter) {
-        list(
-          fileFilter = filter,
+      ), if (!is.null(file_filter)) {
+        list(fileFilter = list(
+          filter = file_filter,
           includeUndefinedFiles = TRUE
-        )
+        ))
       }),
       arguments = get_all_groups() |> combine_groups()
     ))
@@ -157,10 +155,9 @@ get_check_function_ids <- function(test_path = NULL) {
   })
 }
 
-gather_slicing_points <- function(test_path = NULL) {
-  # FIXME: we only want to search in the test files, do we?
+gather_slicing_points <- function(file_filter = NULL) {
   logger::log_trace("Searching for slicing points", namespace = "slicingCoverage")
-  check_function_ids <- get_check_function_ids(test_path)
+  check_function_ids <- get_check_function_ids(file_filter)
   logger::log_debug("Found %d slicing points", length(check_function_ids), namespace = "slicingCoverage")
   criteria <- lapply(check_function_ids, function(id) sprintf("$%s", id))
   return(list(

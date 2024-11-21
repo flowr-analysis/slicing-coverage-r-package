@@ -16,6 +16,7 @@ Imports:
     covr (>= 3.0.0),
     flowr,
     logger (>= 0.3.0),
+    stringr,
     tools
 Suggests:
     testthat (>= 3.0.0),

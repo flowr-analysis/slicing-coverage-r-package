@@ -235,13 +235,14 @@ as_slicing_coverage <- function(coverage, slice) {
   ))
 }
 
-give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests, test_path = NULL) { # nolint: object_length_linter, line_length_linter.
+give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests) { # nolint: object_length_linter, line_length_linter.
   covr_time <- covr_measure$elapsed_time
   covr <- covr_measure$result
 
   ana_time <- measure(init_analysis(c(sources, tests)), only_time = TRUE)
 
-  slicing_measure <- retrieve_slice(test_path)
+  filter <- sprintf("(%s)", paste(stringr::str_escape(tests), collapse = "|"))
+  slicing_measure <- retrieve_slice(filter)
   slicing_points <- slicing_measure$slicing_points
   slicing_time <- slicing_measure$slicing_time
   query_time <- slicing_measure$query_time
