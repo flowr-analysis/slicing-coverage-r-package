@@ -282,7 +282,7 @@ test_that("We can find all assertions", {
     pkg <- p[[1]]
     expected_assertions <- p[[2]]
 
-    test_file <- get(paste0("file_", pkg), inherits = TRUE)
+    test_file <- get(paste0("file_", pkg))
     slicing_points <- file_coverage(file, test_file)$slicing_points
 
     test_that(paste("we can find all assertions in", pkg), {
