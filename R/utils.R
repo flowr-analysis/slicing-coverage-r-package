@@ -16,9 +16,14 @@ uneverything <- function(x) {
   return(unlist(x) |> unname())
 }
 
+get_files <- function(path, pattern) {
+  files <- list.files(path, pattern = pattern, full.names = TRUE, recursive = TRUE) |> normalizePath()
+  return(files)
+}
+
 get_pkg_source_files <- function(pkg) {
   path <- file.path(pkg, "R")
-  files <- list.files(path, pattern = "\\.(R|r)$", full.names = TRUE) |> normalizePath()
+  files <- get_files(path, "\\.(R|r)$")
   return(list(
     files = files,
     path = path
@@ -27,7 +32,7 @@ get_pkg_source_files <- function(pkg) {
 
 get_pkg_test_files <- function(pkg) {
   path <- file.path(pkg, "tests")
-  files <- list.files(path, pattern = "\\.(R|r)$", full.names = TRUE, recursive = TRUE) |> normalizePath()
+  files <- get_files(path, "\\.(R|r)$")
   return(list(
     files = files,
     path = path
