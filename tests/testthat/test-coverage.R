@@ -63,6 +63,39 @@ test_that("assertion in source file does is not sliced for", {
   expect_equal(covr::percent_coverage(cov$coverage), 50)
 })
 
+test_that("covr does not consider code outside of functions", {
+  file <- file_with_content("
+    x <- 2
+    y <- x + 2
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_true(x - 2 == 0)
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$covr), NaN)
+  expect_equal(covr::percent_coverage(cov$coverage), NaN)
+})
+
+test_that("commented coded does not matter", {
+  file <- file_with_content("
+    # This is a long comment to
+    # test if comments are ignored
+    # Here's a joke:
+    # Why did the math book look so sad? Because it had too many problems!
+    # HAHAHAHAHAHAHA
+    add <- function(a,b) a+b
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_equal(add(1,2), 3)
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$coverage), 100)
+})
+
 test_that("slicing coverage can equal normal coverage", {
   file <- file_with_content("add <- function(a,b) a+b")
   test <- file_with_content("
