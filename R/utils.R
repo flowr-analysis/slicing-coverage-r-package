@@ -79,7 +79,9 @@ measure <- function(expr, only_time = FALSE) {
   ))
 }
 
-build_return_value <- function(covr, covr_time, slicing_coverage, slicing_points, ana_time, slicing_time, query_time, unknown_locations) {
+build_return_value <- function(covr, covr_time,
+                               slicing_coverage, slicing_points, ana_time, slicing_time, query_time,
+                               unknown_locations) {
   if (get_option("measure_time") || get_option("return_covr_result") || get_option("slicing_points")) {
     res <- list(coverage = slicing_coverage)
     if (get_option("measure_time")) {
@@ -122,15 +124,7 @@ build_loc2id_key <- function(file, location = NULL, srcref = NULL) {
   return(sprintf("%s:%d:%d:%d:%d", file, first_line, first_column, last_line, last_column))
 }
 
-add_ids_to_coverage <- function(coverage) {
-  logger::log_trace("Merging coverage and slice", namespace = "slicingCoverage")
-  if ("result" %in% names(coverage)) {
-    coverage <- coverage$result
-  }
-
-  nodes <- lapply(get_all_nodes(), function(node) list(id = node$info$id, location = get_location(node)))
-  nodes <- Filter(function(x) !is.null(x$location), nodes)
-
+build_loc2id_map <- function(nodes) {
   location_to_id <- new.env()
   for (node in nodes) {
     full_range <- node$location$fullRange
@@ -144,6 +138,19 @@ add_ids_to_coverage <- function(coverage) {
     key <- build_loc2id_key(file, location = location)
     location_to_id[[key]] <- c(location_to_id[[key]], node$id)
   }
+  return(location_to_id)
+}
+
+add_ids_to_coverage <- function(coverage) {
+  logger::log_trace("Merging coverage and slice", namespace = "slicingCoverage")
+  if ("result" %in% names(coverage)) {
+    coverage <- coverage$result
+  }
+
+  nodes <- lapply(get_all_nodes(), function(node) list(id = node$info$id, location = get_location(node)))
+  nodes <- Filter(function(x) !is.null(x$location), nodes)
+
+  location_to_id <- build_loc2id_map(nodes)
 
   unknown_locations <- list(r = 0, other = 0)
   for (file_and_srcref in names(coverage)) { # something like "file.R:4:3:4:7:3:7:4:4"
@@ -228,7 +235,7 @@ as_slicing_coverage <- function(coverage, slice) {
   ))
 }
 
-give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests, test_path = NULL) {
+give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests, test_path = NULL) { # nolint: object_length_linter, line_length_linter.
   covr_time <- covr_measure$elapsed_time
   covr <- covr_measure$result
 
