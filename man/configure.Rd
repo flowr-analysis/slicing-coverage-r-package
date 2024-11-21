@@ -10,7 +10,9 @@ configure(
   flowr_port = NULL,
   measure_time = NULL,
   return_covr_result = NULL,
-  slicing_points = NULL
+  slicing_points = NULL,
+  log_level = NULL,
+  unknown_locations = NULL
 )
 }
 \arguments{
@@ -25,7 +27,12 @@ calculations. Defaults to FALSE.}
 
 \item{return_covr_result}{Whether to also return the coverage covr calculated}
 
-\item{slicing_points}{Wether to return all slicing points we found and slices for}
+\item{slicing_points}{Whether to return all slicing points we found and slices for}
+
+\item{log_level}{The minimum level of logs that should be shown}
+
+\item{unknown_locations}{Whether to return the number of source refs flowr did not
+know about}
 }
 \description{
 Configures various options for this package. If no value is given for any
