@@ -55,7 +55,7 @@ make_analysis_info_funs <- function(filetoken = NULL) {
     init_analysis = function(files) {
       logger::log_trace("Requesting analysis", namespace = "slicingCoverage")
       with_connection(function(con) {
-        res <- flowr::request_file_analysis(con, files, filetoken = "filetoken") |> verify_flowr_response()
+        res <- flowr::request_file_analysis(con, files) |> verify_flowr_response()
         filetoken <<- res$filetoken
         return()
       })
