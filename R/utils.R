@@ -246,7 +246,7 @@ give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests) { # nol
   slicing_points <- slicing_measure$slicing_points
   slicing_time <- slicing_measure$slicing_time
   query_time <- slicing_measure$query_time
-  slicing_coverage <- as_slicing_coverage(covr, slicing_measure)
+  slicing_coverage <- as_slicing_coverage(covr, slicing_measure$slice)
   unknown_locations <- slicing_coverage$unknown_locations
   slicing_coverage <- slicing_coverage$coverage
 
