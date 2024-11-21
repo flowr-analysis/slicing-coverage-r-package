@@ -278,7 +278,7 @@ test_that("We can find all assertions", {
     assert_that(1+1 == 2)
   ")
 
-  pkgs_and_number_of_assertions <- list(
+  pkgs_and_assertions <- list(
     list("testthat", 4),
     list("unitizer", 1),
     list("rlang", 2),
@@ -288,7 +288,7 @@ test_that("We can find all assertions", {
     list("r", 2),
     list("assertthat", 1)
   )
-  for (p in pkgs_and_number_of_assertions) {
+  for (p in pkgs_and_assertions) {
     pkg <- p[[1]]
     expected_assertions <- p[[2]]
 
