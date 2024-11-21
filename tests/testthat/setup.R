@@ -1,4 +1,4 @@
-configure(return_covr_result = TRUE)
+configure(return_covr_result = TRUE, slicing_points = TRUE)
 
 tryCatch(get_connection(),
   warning = function(e) {

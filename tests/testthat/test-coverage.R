@@ -139,5 +139,121 @@ test_that("Coverage over multiple functions", {
   # The slice is a bit weird here. It excludes `add_helper` and the calls to it
   # But 33.3 is the correct value for the given slice (independent of its correctness)
   expect_equal(covr::percent_coverage(cov$coverage), 33.3, tolerance = 0.1)
+
+  file <- file_with_content("
+    create_custom_list <- function(names, base_value) {
+      custom_list <- setNames(
+        lapply(seq_along(names), function(i) base_value * i),
+        names
+      )
+      return(custom_list)
+    }
+
+    transform_list_elements <- function(input_list, filter_func, transform_func) {
+      filtered_list <- input_list[sapply(input_list, filter_func)]
+      transformed_list <- lapply(filtered_list, transform_func)
+      return(transformed_list)
+    }
+
+    filtered_list <- function() transform_list_elements(
+      create_custom_list(c('apple', 'banana', 'cherry'), 10),
+      function(x) x > 15,
+      function(x) x * 2
+    )
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_equal(length(filtered_list()), 2)
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$coverage), 100)
 })
 
+test_that("Coverage over multiple functions and files", {
+  file1 <- file_with_content("
+    add <- function(a,b) {
+      x <- a+b+1
+      return(sub_one(x))
+    }
+  ")
+  file2 <- file_with_content("
+    i_was_forgotten <- function() print('What a bummer')
+    sub_one <- function(x) x-1
+  ")
+  test1 <- file_with_content("
+    library(testthat)
+    expect_equal(add(1,2), 3)
+  ")
+  test2 <- file_with_content("
+    library(testthat)
+    expect_equal(sub_one(0), -1)
+  ")
+
+  cov <- file_coverage(c(file1, file2), c(test1, test2))
+  expect_equal(covr::percent_coverage(cov$coverage), 75)
+})
+
+test_that("We can find all assertions", {
+  file <- file_with_content("")
+
+  file_testthat <- file_with_content("
+    library(testthat)
+    expect_true(TRUE)
+    expect_length(c(1,2,3), 3)
+    tryCatch(fail(), error = function(e) NULL)
+    expect(TRUE, 'When thats not true, I dont know what is')
+  ")
+
+  file_unitizer <- file_with_content("
+    library(unitizer)
+    unitizer_sect('test', {
+      1+1
+    })
+  ")
+
+  file_rlang <- file_with_content("
+    library(rlang)
+    tryCatch(warn('Warning'), warning = function(w) NULL)
+    tryCatch(abort('Yeet'), error = function(e) NULL)
+  ")
+
+  file_xpectr <- file_with_content("
+    library(xpectr)
+    stop_if(FALSE)
+    warn_if(FALSE)
+  ")
+
+  file_testit <- file_with_content("
+    library(testit)
+    assert(1+1 == 2)
+  ")
+
+  file_runit <- file_with_content("
+    library(RUnit)
+    checkEquals(2, 1+1)
+    checkTrue(TRUE)
+  ")
+
+  file_r <- file_with_content("
+    tryCatch(stop('Stopperino'), error = function(e) NULL)
+    stopifnot(1+1 == 2)
+  ")
+
+  file_assertthat <- file_with_content("
+    library(assertthat)
+    assert_that(1+1 == 2)
+  ")
+
+  for (p in list(list("testthat", 4), list("unitizer", 1), list("rlang", 2), list("xpectr", 2), list("testit", 1), list("runit", 2), list("r", 2), list("assertthat", 1))) {
+    pkg <- p[[1]]
+    expected_assertions <- p[[2]]
+
+    test_file <- get(paste0("file_", pkg), inherits = TRUE)
+    slicing_points <- file_coverage(file, test_file)$slicing_points
+
+    test_that(paste("we can find all assertions in", pkg), {
+      expect_length(slicing_points, expected_assertions)
+    })
+  }
+})
