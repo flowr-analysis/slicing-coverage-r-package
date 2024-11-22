@@ -19,8 +19,8 @@ Imports:
     stringr,
     tools
 Suggests:
-    testthat (>= 3.0.0),
     rlang,
+    testthat (>= 3.0.0),
     withr
 Remotes:
     flowr=flowr-analysis/flowr-r-adapter
