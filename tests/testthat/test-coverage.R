@@ -300,3 +300,54 @@ test_that("We can find all assertions", {
     })
   }
 })
+
+test_that("code that's called by eval or do.call is not in the slice", {
+  file <- file_with_content("
+    do_the_add <- function(a,b) a+b
+    add <- function(a,b) {
+      x <- do.call('do_the_add', list(a, b))
+      return(x)
+    }
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_equal(add(1,2), 3)
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$coverage), 66.7, tolerance = 0.1)
+
+  file <- file_with_content("
+    do_the_add <- function(a,b) a+b
+    add <- function(a,b) {
+      x <- eval(parse(text = 'do_the_add(a,b)'))
+      return(x)
+    }
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_equal(add(1,2), 3)
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$coverage), 66.7, tolerance = 0.1)
+})
+
+test_that("flowr can't slice through objects", {
+  file <- file_with_content("
+    compex_calc_x <- function(x) x*2
+    compex_calc_y <- function(x) x+1
+    doit <- function(x) {
+      x <- compex_calc_x(x)
+      y <- compex_calc_y(x)
+      return(list(x = x, y = y))
+    }
+  ")
+  test <- file_with_content("
+    library(testthat)
+    expect_false(is.null(doit(5)$x))
+  ")
+
+  cov <- file_coverage(file, test)
+  expect_equal(covr::percent_coverage(cov$coverage), 100)
+})
