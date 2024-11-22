@@ -5,17 +5,11 @@
 \title{Configures various options for this package. If no value is given for any
 option, it's default is used.}
 \usage{
-configure(
-  flowr_host = NULL,
-  flowr_port = NULL,
-  measure_time = NULL,
-  return_covr_result = NULL,
-  slicing_points = NULL,
-  log_level = NULL,
-  unknown_locations = NULL
-)
+configure(list = NULL, ...)
 }
 \arguments{
+\item{list}{A list of options to set.}
+
 \item{flowr_host}{The host where the flowr server is running. Defaults to
 "localhost".}
 
