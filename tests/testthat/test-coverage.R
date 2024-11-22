@@ -1,3 +1,5 @@
+skip_if_no_flowr()
+
 test_that("empty tests have n:wo coverage", {
   file <- file_with_content("add <- function(a,b) a+b")
   test <- file_with_content("")
