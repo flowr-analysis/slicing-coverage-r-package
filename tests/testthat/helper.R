@@ -14,7 +14,7 @@ file_with_content <- function(content, ext = ".R") {
 skip_if_no_flowr <- function() {
   tryCatch(get_connection(),
     warning = function(e) {
-      skip(sprintf("flowr is not reachable under %s:%s", get_option("flowr_host"), get_option("flowr_port")))
+      testthat::skip(sprintf("flowr is not reachable under %s:%s", get_option("flowr_host"), get_option("flowr_port")))
     }
   )
 }

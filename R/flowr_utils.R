@@ -46,7 +46,7 @@ get_all_nodes <- function() {
     query <- list(list(type = "id-map"))
     res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
     map <- res$res$results[["id-map"]]$idMap$k2v
-    return(setNames(lapply(map, `[[`, 2), lapply(map, `[[`, 1)))
+    return(stats::setNames(lapply(map, `[[`, 2), lapply(map, `[[`, 1)))
   })
 }
 

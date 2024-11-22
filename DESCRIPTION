@@ -16,11 +16,11 @@ Imports:
     covr (>= 3.0.0),
     flowr,
     logger (>= 0.3.0),
-    rlang,
     stringr,
     tools
 Suggests:
     testthat (>= 3.0.0),
+    rlang,
     withr
 Remotes:
     flowr=flowr-analysis/flowr-r-adapter
