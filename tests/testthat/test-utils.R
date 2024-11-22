@@ -1,3 +1,5 @@
+skip_if_offline()
+
 test_that("we can find all pakage test files", {
   tmp_dir <- tempdir()
   dest_zip <- file.path(tmp_dir, "covr.zip")
