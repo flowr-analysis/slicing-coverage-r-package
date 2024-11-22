@@ -10,18 +10,22 @@ option_env$unknown_locations <- FALSE
 #' Configures various options for this package. If no value is given for any
 #' option, it's default is used.
 #'
-#' @param flowr_host The host where the flowr server is running. Defaults to
-#' "localhost".
-#' @param flowr_port The port where the flowr server is running. Defaults to
-#' 1042.
-#' @param measure_time Whether to measure the execution time of different
-#' calculations. Defaults to FALSE.
-#' @param return_covr_result Whether to also return the coverage covr calculated
-#' @param slicing_points Whether to return all slicing points we found and slices for
-#' @param log_level The minimum level of logs that should be shown
-#' @param unknown_locations Whether to return the number of source refs flowr did not
-#' know about
-#' @param list A list of options to set.
+#' @param list Options passed explicitly as a list
+#' @param ... Key value pairs of options. The following options are available:
+#' \itemize{
+#'  \item flowr_host The host where the flowr server is running. Defaults to
+#'  "localhost".
+#'  \item flowr_port The port where the flowr server is running. Defaults to
+#'  1042.
+#'  \item measure_time Whether to measure the execution time of different
+#'  calculations. Defaults to FALSE.
+#'  \item return_covr_result Whether to also return the coverage covr calculated
+#'  \item slicing_points Whether to return all slicing points we found and slices for
+#'  \item log_level The minimum level of logs that should be shown
+#'  \item unknown_locations Whether to return the number of source refs flowr did not
+#'  know about
+#' }
+#' @return A list of all options and their values before the configuration.
 #'
 #' @export
 configure <- function(list = NULL, ...) {
