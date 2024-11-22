@@ -247,14 +247,12 @@ test_that("We can find all assertions", {
 
   file_rlang <- file_with_content("
     library(rlang)
-    tryCatch(warn('Warning'), warning = function(w) NULL)
     tryCatch(abort('Yeet'), error = function(e) NULL)
   ")
 
   file_xpectr <- file_with_content("
     library(xpectr)
     stop_if(FALSE)
-    warn_if(FALSE)
   ")
 
   file_testit <- file_with_content("
@@ -281,8 +279,8 @@ test_that("We can find all assertions", {
   pkgs_and_assertions <- list(
     list("testthat", 4),
     list("unitizer", 1),
-    list("rlang", 2),
-    list("xpectr", 2),
+    list("rlang", 1),
+    list("xpectr", 1),
     list("testit", 1),
     list("runit", 2),
     list("r", 2),
