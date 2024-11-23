@@ -6,6 +6,7 @@ option_env$return_covr_result <- FALSE
 option_env$slicing_points <- FALSE
 option_env$log_level <- "INFO"
 option_env$unknown_locations <- FALSE
+option_env$return_srcrefs <- FALSE
 
 #' Configures various options for this package. If no value is given for any
 #' option, it's default is used.
@@ -24,6 +25,8 @@ option_env$unknown_locations <- FALSE
 #'  \item log_level The minimum level of logs that should be shown
 #'  \item unknown_locations Whether to return the number of source refs flowr did not
 #'  know about
+#'  \item return_srcrefs Whether to return all srcrefs, the ones that were covered and the
+#'  ones that were in the slice.
 #' }
 #' @return A list of all options and their values before the configuration.
 #'

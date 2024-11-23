@@ -23,6 +23,8 @@ calculations. Defaults to FALSE.
 \item log_level The minimum level of logs that should be shown
 \item unknown_locations Whether to return the number of source refs flowr did not
 know about
+\item return_srcrefs Whether to return all srcrefs, the ones that were covered and the
+ones that were in the slice.
 }}
 }
 \value{

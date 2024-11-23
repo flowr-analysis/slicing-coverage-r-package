@@ -86,7 +86,8 @@ measure <- function(expr, only_time = FALSE) {
 
 build_return_value <- function(covr, covr_time,
                                slicing_coverage, slicing_points, ana_time, slicing_time, query_time,
-                               unknown_locations) {
+                               unknown_locations,
+                               srcrefs) {
   if (get_option("measure_time") || get_option("return_covr_result") || get_option("slicing_points")) {
     res <- list(coverage = slicing_coverage)
     if (get_option("measure_time")) {
@@ -104,6 +105,9 @@ build_return_value <- function(covr, covr_time,
     }
     if (get_option("unknown_locations")) {
       res$unknown_locations <- unknown_locations
+    }
+    if (get_option("return_srcrefs")) {
+      res$srcrefs <- srcrefs
     }
     return(res)
   }
@@ -146,7 +150,7 @@ build_loc2id_map <- function(nodes) {
   return(location_to_id)
 }
 
-add_ids_to_coverage <- function(coverage) {
+add_slc_to_coverage <- function(coverage, slice) {
   logger::log_trace("Merging coverage and slice", namespace = "slicingCoverage")
   if ("result" %in% names(coverage)) {
     coverage <- coverage$result
@@ -173,6 +177,7 @@ add_ids_to_coverage <- function(coverage) {
       next
     }
     elem$flowr_ids <- ids
+    elem$in_slice <- any(ids %in% slice)
     coverage[[file_and_srcref]] <- elem
   }
 
@@ -194,24 +199,25 @@ add_ids_to_coverage <- function(coverage) {
   ))
 }
 
-remove_ids_from_coverage <- function(coverage) {
+remove_slc_from_coverage <- function(coverage) {
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
     elem$flowr_ids <- NULL
+    elem$in_slice <- NULL
     coverage[[i]] <- elem
   }
   return(coverage)
 }
 
-recalculate_values <- function(coverage, exec_and_slc_ids) {
+recalculate_values <- function(coverage) {
   logger::log_trace("Adjusting coverage values", namespace = "slicingCoverage")
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
-    flowr_ids <- elem$flowr_ids
-    if (is.null(flowr_ids)) { # This should not happen (see add_ids_to_coverage)
+    in_slice <- elem$in_slice
+    if (is.null(in_slice)) { # This should not happen (see add_ids_to_coverage)
       next
     }
-    if (any(flowr_ids %in% exec_and_slc_ids)) { # No need to change anything as element is in the slice
+    if (in_slice) { # No need to change anything as element is in the slice
       next
     }
 
@@ -221,22 +227,24 @@ recalculate_values <- function(coverage, exec_and_slc_ids) {
   return(coverage)
 }
 
-as_slicing_coverage <- function(coverage, slice) {
-  coverage_with_ids <- add_ids_to_coverage(coverage)
-  unknown_locations <- coverage_with_ids$unknown_locations
-  coverage_with_ids <- coverage_with_ids$coverage
-
-  set_executed <- Filter(was_executed, coverage_with_ids) |>
-    lapply(get_flowr_id) |>
-    uneverything()
-  set_slice <- unlist(slice)
-  set_exec_and_slice <- intersect(set_executed, set_slice)
-
-  slicing_coverage <- recalculate_values(coverage_with_ids, set_exec_and_slice) |> remove_ids_from_coverage()
-
+get_coverered_and_sliced_srcrefs <- function(slc_coverage) { # nolint: object_length_linter.
+  all <- c()
+  covered <- c()
+  sliced <- c()
+  for (srcref in names(slc_coverage)) {
+    elem <- slc_coverage[[srcref]]
+    all <- c(all, srcref)
+    if (was_executed(elem)) {
+      covered <- c(covered, srcref)
+    }
+    if (elem$in_slice) {
+      sliced <- c(sliced, srcref)
+    }
+  }
   return(list(
-    coverage = slicing_coverage,
-    unknown_locations = unknown_locations
+    all = all,
+    covered = covered,
+    sliced = sliced
   ))
 }
 
@@ -251,13 +259,19 @@ give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests) { # nol
   slicing_points <- slicing_measure$slicing_points
   slicing_time <- slicing_measure$slicing_time
   query_time <- slicing_measure$query_time
-  slicing_coverage <- as_slicing_coverage(covr, slicing_measure$slice)
-  unknown_locations <- slicing_coverage$unknown_locations
-  slicing_coverage <- slicing_coverage$coverage
+
+  coverage_with_slc <- add_slc_to_coverage(covr, slicing_measure$slice)
+  unknown_locations <- coverage_with_slc$unknown_locations
+  coverage_with_slc <- coverage_with_slc$coverage
+
+  srcrefs <- get_coverered_and_sliced_srcrefs(coverage_with_slc)
+
+  slicing_coverage <- recalculate_values(coverage_with_slc) |> remove_slc_from_coverage()
 
   return(build_return_value(
     covr, covr_time,
     slicing_coverage, slicing_points, ana_time, slicing_time, query_time,
-    unknown_locations
+    unknown_locations,
+    srcrefs
   ))
 }
