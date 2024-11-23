@@ -231,20 +231,24 @@ get_coverered_and_sliced_srcrefs <- function(slc_coverage) { # nolint: object_le
   all <- c()
   covered <- c()
   sliced <- c()
+  unsure_sliced <- c()
   for (srcref in names(slc_coverage)) {
     elem <- slc_coverage[[srcref]]
     all <- c(all, srcref)
     if (was_executed(elem)) {
       covered <- c(covered, srcref)
     }
-    if (elem$in_slice) {
+    if (is.null(elem$in_slice)) {
+      unsure_sliced <- c(unsure_sliced, srcref)
+    } else if (isTRUE(elem$in_slice)) {
       sliced <- c(sliced, srcref)
     }
   }
   return(list(
     all = all,
     covered = covered,
-    sliced = sliced
+    sliced = sliced,
+    unsure_sliced = unsure_sliced
   ))
 }
 
