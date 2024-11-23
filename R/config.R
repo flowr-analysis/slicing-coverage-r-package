@@ -46,7 +46,10 @@ configure <- function(list = NULL, ...) {
     }
   }
 
-  return(all_opts)
+  if (length(args) == 0) {
+    return(all_opts)
+  }
+  return(invisible(all_opts))
 }
 
 
