@@ -107,7 +107,7 @@ retrieve_slice <- function(file_filter = NULL) {
       ))
 
       slicing_measure <- measure(flowr::request_query(con, get_filetoken(), query)) |> verify_flowr_response()
-      slicing_time <- slicing_time + slicing_measure$elapsed_time
+      slicing_time <<- slicing_time + slicing_measure$elapsed_time
       slc_res <- slicing_measure$result |> verify_flowr_response()
       static_slice <- slc_res$res$results[["static-slice"]]
       ids <- list()
