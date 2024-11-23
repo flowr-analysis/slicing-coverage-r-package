@@ -25,6 +25,10 @@ make_connection_funs <- function(con = NULL) {
 
 connection_funs <- make_connection_funs()
 get_connection <- connection_funs$get_connection
+
+#' Closes the connection to the program slicer.
+#'
+#' @export
 close_connection <- connection_funs$close_connection
 
 handle_flowr_error <- function(err) {
