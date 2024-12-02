@@ -25,6 +25,8 @@ calculations. Defaults to FALSE.
 know about
 \item return_srcrefs Whether to return all srcrefs, the ones that were covered and the
 ones that were in the slice.
+\item return_annotated_cov Whether the returned object should be annotated with
+slicing information.
 }}
 }
 \value{

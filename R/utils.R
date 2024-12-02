@@ -88,6 +88,9 @@ build_return_value <- function(covr, covr_time,
                                slicing_coverage, slicing_points, ana_time, slicing_time, query_time,
                                unknown_locations,
                                srcrefs) {
+  if (!get_option("return_annotated_cov")) {
+    slicing_coverage <- remove_slc_from_coverage(slicing_coverage)
+  }
   if (get_option("measure_time") || get_option("return_covr_result") || get_option("slicing_points")) {
     res <- list(coverage = slicing_coverage)
     if (get_option("measure_time")) {
@@ -209,19 +212,13 @@ remove_slc_from_coverage <- function(coverage) {
   return(coverage)
 }
 
-recalculate_values <- function(coverage) {
+recalculate_values <- function(
+    coverage,
+    new_value = function(row) if (is.null(row$in_slice) || row$in_slice) row$value else 0) {
   logger::log_trace("Adjusting coverage values", namespace = "slicingCoverage")
   for (i in seq_along(coverage)) {
     elem <- coverage[[i]]
-    in_slice <- elem$in_slice
-    if (is.null(in_slice)) { # This should not happen (see add_ids_to_coverage)
-      next
-    }
-    if (in_slice) { # No need to change anything as element is in the slice
-      next
-    }
-
-    elem$value <- 0
+    elem$value <- new_value(elem)
     coverage[[i]] <- elem
   }
   return(coverage)
@@ -270,7 +267,7 @@ give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests) { # nol
 
   srcrefs <- get_coverered_and_sliced_srcrefs(coverage_with_slc)
 
-  slicing_coverage <- recalculate_values(coverage_with_slc) |> remove_slc_from_coverage()
+  slicing_coverage <- recalculate_values(coverage_with_slc)
 
   return(build_return_value(
     covr, covr_time,

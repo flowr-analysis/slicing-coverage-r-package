@@ -39,3 +39,23 @@ package_coverage <- function(path = ".") {
 
   return(give_me_covr_and_i_do_the_rest(covr_measure, sources$files, tests$files))
 }
+
+#' Calculate the maximum possible slicing coverage with the current assertions.
+#' Considering this value can indicate whether the slicing coverage score is limited by
+#' the number of assertions or the amount of covered code.
+#'
+#' @param f Function to calculate slicing coverage
+#' @param ... Arguments to pass to the function
+#'
+#' @export
+maximum_coverage <- function(f, ...) {
+  cov <- with_options(list(return_annotated_cov = TRUE), f(...))
+  max_cov <- recalculate_values(cov, new_value = function(row) {
+    if (is.null(row$in_slice) || row$in_slice) {
+      max(row$value, 1)
+    } else {
+      0
+    }
+  }) |> remove_slc_from_coverage()
+  return(max_cov)
+}

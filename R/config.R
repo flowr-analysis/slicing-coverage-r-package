@@ -7,6 +7,7 @@ option_env$slicing_points <- FALSE
 option_env$log_level <- "INFO"
 option_env$unknown_locations <- FALSE
 option_env$return_srcrefs <- FALSE
+option_env$return_annotated_cov <- FALSE
 
 #' Configures various options for this package. If no value is given for any
 #' option, it's default is used.
@@ -27,6 +28,8 @@ option_env$return_srcrefs <- FALSE
 #'  know about
 #'  \item return_srcrefs Whether to return all srcrefs, the ones that were covered and the
 #'  ones that were in the slice.
+#'  \item return_annotated_cov Whether the returned object should be annotated with
+#'  slicing information.
 #' }
 #' @return A list of all options and their values before the configuration.
 #'
