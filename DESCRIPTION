@@ -1,5 +1,5 @@
 Package: slicingCoverage
-Title: Slicing Coverage for Packages
+Title: Slicing Coverage
 Version: 0.1.0
 Authors@R:
     person("Lukas", "Pietzschmann", , "lukas.pietzschmann@uni-ulm.de", role = c("aut", "cre"))
