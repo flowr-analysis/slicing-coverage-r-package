@@ -22,6 +22,11 @@ combine_groups <- function(names) {
   return(groups |> lapply(normalize_group) |> unlist(recursive = FALSE))
 }
 
+with_user_functions <- function(query, regexes) {
+  q <- lapply(regexes, function(r) list(callName = r, kind = "user", includeAliases = TRUE))
+  return(c(query, q))
+}
+
 get_all_groups <- function() {
   return(list.files(system.file("queries", package = "slicingCoverage")))
 }

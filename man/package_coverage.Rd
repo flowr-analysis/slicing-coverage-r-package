@@ -4,10 +4,13 @@
 \alias{package_coverage}
 \title{Calculate slicing coverage for a package}
 \usage{
-package_coverage(path = ".")
+package_coverage(path = ".", additional_functions = c())
 }
 \arguments{
 \item{path}{Path to the package}
+
+\item{additional_functions}{Character vector of regular expressions that match
+functions that should additionally be considered as assertions}
 }
 \description{
 Calculate slicing coverage for a package

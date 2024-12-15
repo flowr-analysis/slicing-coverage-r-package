@@ -8,7 +8,8 @@ file_coverage(
   source_files,
   test_files,
   line_exclusions = NULL,
-  function_exclusions = NULL
+  function_exclusions = NULL,
+  additional_functions = c()
 )
 }
 \arguments{
@@ -19,6 +20,9 @@ file_coverage(
 \item{line_exclusions}{Currently unsupported}
 
 \item{function_exclusions}{Currently unsupported}
+
+\item{additional_functions}{Character vector of regular expressions that match
+functions that should additionally be considered as assertions}
 }
 \description{
 Calculate slicing coverage for a set of files

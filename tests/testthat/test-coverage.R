@@ -301,6 +301,33 @@ test_that("We can find all assertions", {
   }
 })
 
+test_that("We can find all user defined assertions", {
+  file <- file_with_content("")
+  test <- file_with_content("
+    my_assertion <- function(a,b) {}
+    my_assertion(1 + 2, 3)
+  ")
+
+  slicing_points <- file_coverage(file, test, additional_functions =  c("^my_assertion$"))$slicing_points
+  expect_length(slicing_points, 1)
+
+  test <- file_with_content("
+    disguised_assertion <- function(a,b) {}
+    my_cool_assertion <- function(a,b) {}
+    my_uncool_assertion <- function(a,b) {}
+
+    disguised_assertion(1 + 2, 3)
+
+    my_cool_assertion(1 + 2, 3)
+    my_uncool_assertion(1 + 2, 3)
+  ")
+
+  slicing_points <- file_coverage(file, test,
+    additional_functions = c("^disguised_assertion$", "^my_(un)?cool_assertion$")
+  )$slicing_points
+  expect_length(slicing_points, 3)
+})
+
 test_that("code that's called by eval or do.call is not in the slice", {
   file <- file_with_content("
     do_the_add <- function(a,b) a+b

@@ -249,14 +249,14 @@ get_coverered_and_sliced_srcrefs <- function(slc_coverage) { # nolint: object_le
   ))
 }
 
-give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests) { # nolint: object_length_linter, line_length_linter.
+give_me_covr_and_i_do_the_rest <- function(covr_measure, sources, tests, additional_functions = c()) { # nolint: object_length_linter, line_length_linter.
   covr_time <- covr_measure$elapsed_time
   covr <- covr_measure$result
 
   ana_time <- measure(init_analysis(c(sources, tests)), only_time = TRUE)
 
   filter <- sprintf("(%s)", paste(stringr::str_escape(tests), collapse = "|"))
-  slicing_measure <- retrieve_slice(filter)
+  slicing_measure <- retrieve_slice(filter, additional_functions)
   slicing_points <- slicing_measure$slicing_points
   slicing_time <- slicing_measure$slicing_time
   query_time <- slicing_measure$query_time

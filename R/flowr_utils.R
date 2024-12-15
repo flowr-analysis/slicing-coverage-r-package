@@ -77,8 +77,8 @@ analysis_info_funs <- make_analysis_info_funs()
 init_analysis <- analysis_info_funs$init_analysis
 get_filetoken <- analysis_info_funs$get_filetoken
 
-retrieve_slice <- function(file_filter = NULL) {
-  slicing_points_measure <- measure(gather_slicing_points(file_filter))
+retrieve_slice <- function(file_filter = NULL, additional_functions = c()) {
+  slicing_points_measure <- measure(gather_slicing_points(file_filter, additional_functions))
   query_time <- slicing_points_measure$elapsed_time
   slicing_points <- slicing_points_measure$result
   criteria <- slicing_points$criteria
@@ -127,7 +127,7 @@ retrieve_slice <- function(file_filter = NULL) {
   ))
 }
 
-get_check_function_ids <- function(file_filter = NULL) {
+get_check_function_ids <- function(file_filter = NULL, additional_functions = c()) {
   if (!is.null(file_filter)) {
     logger::log_debug("Only searching for assertions in %s", file_filter, namespace = "slicingCoverage")
   }
@@ -144,7 +144,7 @@ get_check_function_ids <- function(file_filter = NULL) {
           includeUndefinedFiles = TRUE
         ))
       }),
-      arguments = get_all_groups() |> combine_groups()
+      arguments = get_all_groups() |> combine_groups() |> with_user_functions(additional_functions)
     ))
 
     res <- flowr::request_query(con, get_filetoken(), query) |> verify_flowr_response()
@@ -159,9 +159,9 @@ get_check_function_ids <- function(file_filter = NULL) {
   })
 }
 
-gather_slicing_points <- function(file_filter = NULL) {
+gather_slicing_points <- function(file_filter = NULL, additional_functions = c()) {
   logger::log_trace("Searching for slicing points", namespace = "slicingCoverage")
-  check_function_ids <- get_check_function_ids(file_filter)
+  check_function_ids <- get_check_function_ids(file_filter, additional_functions)
   logger::log_debug("Found %d slicing points", length(check_function_ids), namespace = "slicingCoverage")
   criteria <- lapply(check_function_ids, function(id) sprintf("$%s", id))
   return(list(
